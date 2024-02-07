@@ -1,4 +1,4 @@
-## run with python3.11 -m IPython
+# run with python3.11 -m IPython
 import requests
 from bs4 import BeautifulSoup
 import nltk as k
@@ -69,7 +69,3 @@ for a in achados_[:10]:
         print(count)
         count += 1
     hinarios[a] = HINOS
-
-
-
-
