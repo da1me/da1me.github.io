@@ -36,7 +36,8 @@ for num, dono in enumerate(donos2):  # finding owners and her hymnals
 
 # check donos dictionary is as expected
 for dono in donos:
-    for hinario in donos[dono]:
+    for hinario_name in donos[dono]:
+        hinario = donos[dono][hinario_name]
         link = hinario['link']
         r = requests.get(link)
         s = BeautifulSoup(r.content, 'html.parser')
@@ -72,7 +73,6 @@ for dono in donos:
             hinario['hymns'].append(HINO)
             print(count)
             count += 1
-        hinarios[a] = HINOS
 
 # qua manca:
 # capire se donos dict finisce con una buona struttura di dato
