@@ -238,7 +238,7 @@ def main():
                 case other:
                     raise ValueError(f"Non so cosa fare con {o.path.split('/')[1]}.")
         except ValueError:
-            logging.error("Non posso lavorare su %s. Vado avanti...", %s)
+            logging.error('Non posso lavorare su %s. Vado avanti...', url)
             continue
 
 if __name__ == "__main__":
