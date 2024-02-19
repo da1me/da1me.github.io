@@ -18,13 +18,13 @@ SAVE_DIR = 'hinos'
 def check_name(name_to_check, list_of_names, separator='_'):
     """
     Controlla che non ci siano omonimi e, in caso affermativo, aggiunge
-    un contantore al termine del nome.
+    un contatore al termine del nome.
     """
     if name_to_check not in list_of_names:
         return name_to_check
     counter = 1
     if len(name_to_check.split(separator)) > 1:
-        counter = int(name_to_check.split('_')[1]) + 1
+        counter = int(name_to_check.split(separator)[1]) + 1
     return check_name(f"{name_to_check.split(separator)[0]}{separator}{counter}", list_of_names)
 
 def download_catalog(url, save_hinario=False, save_hino=False):
@@ -62,7 +62,7 @@ def download_hinario(url, save_hino=False):
         'hinos': []
     }
 
-    logging.info('+ %s', hinario['title'])
+    logging.info('+ %s (%s)', hinario['title'], hinario['person'])
 
     hinos_raw = soup.select('.hymn-list-name a')
     for hino_raw in hinos_raw:
