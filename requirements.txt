@@ -1,0 +1,4 @@
+beautifulsoup4==4.12.3
+langdetect==1.0.9
+nltk==3.8.1
+Requests==2.31.0
