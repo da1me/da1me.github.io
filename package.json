@@ -1,0 +1,24 @@
+{
+  "name": "da1me",
+  "devDependencies": {
+    "standard": "*"
+  },
+  "scripts": {
+    "build": "browserify scripts/main.js > scripts/bundle.js",
+    "dev": "nodemon app.js --exec 'standard && npm run build && node'",
+    "fixme": "standard --fix"
+  },
+  "dependencies": {
+        "jquery": "^3.7.1"
+  },
+  "standard": {
+    "ignore": [
+      "**/bundle.js",
+      "scripts/bundle.js",
+      "**/*_ok.js",
+      "**/*.py",
+      "**/hinos/*"
+    ]
+  }
+}
+
