@@ -11964,6 +11964,7 @@ window.jQuery = $
 // load the JSON file from the hymns
 // plot hymn words according to the selected hymn
 $.getJSON('hinos/td.json', function (data) {
+  $('<label/>', { for: 'mselect' }).html('select hymnal: ').appendTo('#selectDiv')
   const s = $('<select/>', { id: 'mselect' }).appendTo('#selectDiv')
     .attr('title', 'Select hymn to analyze.')
     .on('change', aself => {
@@ -11979,34 +11980,7 @@ $.getJSON('hinos/td.json', function (data) {
       // pessoa
       // hinário
       // cada hino
-
-      function getTokens (tokens) {
-        if ('pt' in tokens) {
-          return tokens.pt
-        }
-        return []
-      }
-      const tokens = e.hinos.reduce((a, h) => [...a, ...getTokens(h.tokens)], [])
-      console.log({ tokens })
-      window.tt = tokens
-      const tokensLower = tokens.map(t => t.toLowerCase())
-      const tokensSet = [...new Set(tokensLower)].filter(t => !stopWords_.includes(t))
-      const tokensHist = tokensSet.map(t => {
-        const count = tokensLower.filter(tt => t === tt).length
-        return { t, count }
-      })
-      tokensHist.sort((a, b) => a.count > b.count ? -1 : 1)
-      // const items = tokensHist.map((t, i) => {
-      //   return `<li>(${i}) ${t.t} - ${t.count}x</li>`
-      // })
-      // $('<ul/>', {
-      //   class: 'my-new-list',
-      //   html: items.join('')
-      // }).appendTo('#contentDiv')
-      const list = tokensHist.map(i => [i.t, i.count])
-      WordCloud(document.getElementById('contentCanvas'), { list, weightFactor: 100 / tokensHist[0].count })
-
-      window.th = { tokensHist, list }
+      plotWordcloud(e)
     })
 
   // const cd = $('<div/>', { id: 'contentDiv' }).appendTo('body')
@@ -12018,7 +11992,38 @@ $.getJSON('hinos/td.json', function (data) {
     s.append($('<option/>', { class: 'pres' }).val(count).html(aname))
     $('#loading').hide()
   })
+  plotWordcloud(data.hinarios[0])
 })
+
+function plotWordcloud (hinario) {
+  function getTokens (tokens) {
+    if ('pt' in tokens) {
+      return tokens.pt
+    }
+    return []
+  }
+  const tokens = hinario.hinos.reduce((a, h) => [...a, ...getTokens(h.tokens)], [])
+  console.log({ tokens })
+  window.tt = tokens
+  const tokensLower = tokens.map(t => t.toLowerCase())
+  const tokensSet = [...new Set(tokensLower)].filter(t => !stopWords_.includes(t))
+  const tokensHist = tokensSet.map(t => {
+    const count = tokensLower.filter(tt => t === tt).length
+    return { t, count }
+  })
+  tokensHist.sort((a, b) => a.count > b.count ? -1 : 1)
+  // const items = tokensHist.map((t, i) => {
+  //   return `<li>(${i}) ${t.t} - ${t.count}x</li>`
+  // })
+  // $('<ul/>', {
+  //   class: 'my-new-list',
+  //   html: items.join('')
+  // }).appendTo('#contentDiv')
+  const list = tokensHist.map(i => [i.t, i.count])
+  WordCloud(document.getElementById('contentCanvas'), { list, weightFactor: 100 / tokensHist[0].count })
+
+  window.th = { tokensHist, list }
+}
 
 const stopWords = [
   'a',
