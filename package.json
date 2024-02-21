@@ -9,7 +9,8 @@
     "fixme": "standard --fix"
   },
   "dependencies": {
-        "jquery": "^3.7.1"
+    "jquery": "^3.7.1",
+    "wordcloud": "^1.2.2"
   },
   "standard": {
     "ignore": [
@@ -21,4 +22,3 @@
     ]
   }
 }
-
