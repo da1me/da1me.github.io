@@ -112,6 +112,7 @@ def download_hino(url, hinario=''):
         'title': soup.select('.hymn-title h5')[0].get_text().strip(),
         'verses': [],
         'tokens': {},
+        'reps_pattern': get_reps_pattern(soup)
         }
 
     logging.info('  - %s. %s', hino['index'], hino['title'])
@@ -157,6 +158,35 @@ def download_person(url, save_hinario=False, save_hino=False):
         del hinario['person']
         person['hinarios'].append(hinario)
     return person
+
+def get_reps_pattern(soup):
+    """ Estrae dal codice HTML il pattern delle ripetizioni. """
+
+    first_stanza = soup.select('.hymnstanza')[2]
+    bars = first_stanza.select('[class*="hymn-bar"]')
+    reps_pattern = []
+
+    for bar in bars:
+        match bar.attrs['class'][0]:
+            case 'hymn-bar-empty':
+                if bar.select('.hymn-spacer'):
+                    continue
+                if bar.select('.hymn-bar-full'):
+                    rep = bar.span.get_text()
+                    reps_pattern.append(rep[:1])  # FIXME: https://nossairmandade.com/hymn/226/AmigoVelho
+                else:
+                    reps_pattern.append(1)
+            case 'hymn-bar-full':
+                if (bar.find_parent().attrs['class'][0] == 'hymn-bar-full') \
+                    or (bar.find_parent().attrs['class'][0] == 'hymn-bar-empty'):
+                    continue
+                if bar.find_parent().attrs['class'][0] == 'hymnstanza':
+                    if len(bar.select('.hymn-bar-full')) != 0:
+                        reps_pattern.append(5)
+                    else:
+                        reps_pattern.append(2)
+
+    return reps_pattern
 
 def main():
     """ Funzione principale. """
