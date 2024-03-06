@@ -238,14 +238,20 @@ def main():
                 raise ValueError(f"{o.netloc} non è supportato.")
             match o.path.split('/')[1]:
                 case 'hinarios':
-                    catalog = download_catalog(url, save_hinario=args.save_hinario, save_hino=args.save_hino)
+                    catalog = download_catalog(url,
+                                               save_hinario=args.save_hinario,
+                                               save_hino=args.save_hino
+                                               )
                     if args.save_catalog:
                         catalog_json = json.dumps(catalog, indent=4)
                         filename = f"./{SAVE_DIR}/{catalog['title']}.json"
                         with open(filename, 'w', encoding='utf-8') as outfile:
                             outfile.write(catalog_json)
                 case 'person':
-                    person = download_person(url, save_hinario=args.save_hinario, save_hino=args.save_hino)
+                    person = download_person(url,
+                                             save_hinario=args.save_hinario,
+                                             save_hino=args.save_hino
+                                             )
                     if args.save_person:
                         person_json = json.dumps(person, indent=4)
                         filename = f"./{SAVE_DIR}/{person['name']}.json"
