@@ -303,7 +303,7 @@ def flag_hino(hino):
         flags.append('other')
 
     if len(flags) > 0:
-        hino['flag'] = flags
+        hino['flags'] = flags
 
     return hino
 
