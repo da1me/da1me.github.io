@@ -297,6 +297,9 @@ def flag_hino(hino):
     try:
         for stanza in hino['text']['pt']:
             lengths.append(len(stanza['verses']))
+            if (('' in stanza['verses']) and
+                ('empty' not in flags)):
+                flags.append('empty')
         if any(length != lengths[0] for length in lengths):
             flags.append('length')
     except (IndexError, KeyError):
