@@ -8,9 +8,7 @@ from pathlib import Path
 import json
 import requests
 from bs4 import BeautifulSoup
-import nltk as k
 from langdetect import detect
-from deepmerge import always_merger
 
 SAVE_DIR = 'hinos'
 
@@ -56,8 +54,15 @@ def download_hinario(url, save_hino=False):
     req = requests.get(url, timeout=10)
     soup = BeautifulSoup(req.content, 'html.parser')
 
+    person = ''
+
+    try:
+        person = soup.select('.breadcrumb li:nth-last-of-type(2) a')[0].get_text().strip()
+    except IndexError:
+        person = 'Compilation'
+
     hinario = {
-        'person': soup.select('.breadcrumb li:nth-last-of-type(2) a')[0].get_text().strip(),
+        'person': person,
         'title': soup.select('.page_breadcrumbs h2')[0].find(string=True, recursive=False).get_text().strip(),
         'hinos': []
     }
@@ -73,8 +78,10 @@ def download_hinario(url, save_hino=False):
             filename = f"./{SAVE_DIR}/{hino['person']} - {hino['hinario']} - {hino['index']}. {hino['title']}.json"
             with open(filename, 'w', encoding='utf-8') as outfile:
                 outfile.write(hino_json)
+
         # Essendo già presenti nei dati dell'hinario, chi lo ha ricevuto
-        # e il titolo sono informazioni ridondanti.
+        # e il titolo sono informazioni ridondanti.ù
+
         del hino['person']
         del hino['hinario']
         hinario['hinos'].append(hino)
@@ -92,12 +99,15 @@ def download_hino(url, hinario=''):
     # Se alla funzione non viene passato il titolo dell'hinario, significa che
     # si sta scaricando il singolo hino, e perciò verranno presi per validi
     # il titolo e l'indice nella barra principale.
+
     if hinario == '':
         hinario = soup.select('.hinario-breadcrumb-hinario a')[0].get_text().strip().split('#')[0]
-    else:
+
         # Se invece viene passato il titolo, per recuperare l'indice corretto
         # è necessario selezionare l'indice relativo all'hinario interessato
-        # in quanto lo stesso hino può figurare in più di un hinariol
+        # in quanto lo stesso hino può figurare in più di un hinario.
+
+    else:
         sources_raw = soup.select('.hinario-breadcrumb-hinario')
         for source_raw in sources_raw:
             source = source_raw.get_text().split('#')[0].strip()
@@ -105,32 +115,142 @@ def download_hino(url, hinario=''):
                 index = source_raw.get_text().split('#')[1].strip()
                 break
 
+    # Hino contiene alcuni metadati ('person', 'hinario', 'index', 'title', 'reps_pattern')
+    # e 'text' che contiene il testo strutturato:
+    # text: {
+    #     'pt': [
+    #       {
+    #           'reps_pattern': [
+    #               {
+    #                  'from': block_index,
+    #                  'to': block_index + block_length - 1,
+    #                  'reps': reps
+    #              }
+    #           ],
+    #           'verses': [
+    #             'verso 1',
+    #             'verso 2,
+    #             ...
+    #           ]
+    #     ],
+    #     'en': [
+    #       ...
+    #     ],
+    #     ...
+    # }
+
     hino = {
         'person': soup.select('.breadcrumb li:nth-of-type(1) a')[0].get_text().strip(),
         'hinario': hinario,
         'index': index,
         'title': soup.select('.hymn-title h5')[0].get_text().strip(),
-        'verses': [],
-        'tokens': {},
+        'text': {}
         }
 
     logging.info('  - %s. %s', hino['index'], hino['title'])
 
     # Analizza le singole strofe
     stanzas_raw = soup.select('.hymnstanza:has(.hymn-words)')
-    for stanza in stanzas_raw:
-        repetitions = stanza.select('.hymn-words')
-        for repetition in repetitions:
-            text = re.sub(' +', ' ', repetition.get_text().strip()).split('<br>')[0]
-            if text != '':
-                lang = detect(text)
-                verses = {
-                    'text': text,
-                    'lang': lang
-                }
-                tokens = { lang: k.word_tokenize(text) }
-                hino['verses'].append(verses)
-                hino['tokens'] = always_merger.merge(hino['tokens'], tokens)
+
+    # Qui è memorizzato il pattern della strofa con le barre.
+    last_reps_pattern = []
+
+    for stanza_raw in stanzas_raw:
+
+        # Ogni strofa è divisa in uno o più blocchi per via delle ripetizioni.
+        # Ogni blocco è contrassegnato dalla classe 'hymn-words'.
+
+        blocks = stanza_raw.select('.hymn-words')
+        verses = split_verses(blocks)
+        reps_pattern = []
+
+        # Se la strofa non contiene hymn-bar-full signfica o che l'hino non ha
+        # un pattern di ripetizione, o che si tratta di una strofa successiva
+        # a quella con il pattern, perciò in entrambi i casi possiamo impostarlo
+        # sull'ultimo.
+
+        if len(stanza_raw.select('[class*=hymn-bar-full]')) == 0:
+            if len(last_reps_pattern) == 0:
+                last_reps_pattern = [{
+                    'from': 1,
+                    'to': len(verses),
+                    'reps': 1
+                }]
+            reps_pattern = last_reps_pattern
+        else:
+
+            # Bisogna distinguere tra blocchi e barre: a ogni blocco ('.hymn-words')
+            # corrisponde una e una sola barra ('.hymn-bar-*'), ma ogni barra può
+            # contenere più di un blocco. Dato che le ripetizioni vanno dall'interno
+            # verso l'esterno, è necessario avere il numero dei blocchi per partire dal
+            # fondo della lista.
+
+            blocks = stanza_raw.select('.hymn-words')
+            bars = stanza_raw.select('[class*=hymn-bar-]:not(:has(.hymn-spacer))')
+
+            # Se il numero di barre è uguale a quello dei blocchi, significa che non ci
+            # sono barre che coinvolgono più di un blocco e perciò il pattern è piatto,
+            # ossia ogni verso compare una sola volta nel pattern e l'ordine di ripetizione
+            # corrisponde a quello in cui compaiono gli elementi HTML.
+            #
+            # Se invece le barre sono più dei blocchi, significa che alcuni versi
+            # compariranno in più di una ripetizione. Dato che le ultime ripetizioni
+            # compaiono per prime nel DOM, bisogna per prima cosa invertirle considerando
+            # il numero di blocchi nella strofa.
+            #
+            # EDIT: Questo è ciò che pensavo, ma Amigo Velho mi ha fatto capire che il punto
+            # non è tanto il numero quanto se uno è multiplo dell'altro.
+
+            if len(bars) % len(blocks) > 0:
+                tmp_bars = []
+                rev_bars = list(reversed(bars))
+                for i in range(0, len(bars), 2):
+                    try:
+                        tmp_bars.extend([rev_bars[i + 1], rev_bars[i]])
+                    except IndexError:
+                        tmp_bars.append(rev_bars[i])
+                bars = tmp_bars
+
+            reps_pattern = get_reps_pattern(bars, verses)
+            last_reps_pattern = reps_pattern
+
+            # A questo punto l'unica cosa che bisogna controllare è che non ci fossero
+            # blocchi con la doppia barra, perché in quel caso l'algoritmo registra due
+            # ripetizioni da due invece che una ripetizione da quattro o più.  Per fare
+            # questo è sufficiente controllare se ci sono dict identici in reps_pattern.
+            #
+            # Per amor di semplicità, daremo per scontato che in una strofa non esista
+            # più di un solo blocco con doppia barra.
+
+            # df = pd.DataFrame(reps_pattern)
+            # duplicates = df[df.duplicated(subset=['from', 'to', 'reps'], keep="first")]
+            # if not duplicates.empty:
+            #     reps = 4
+
+
+            #     df.at[duplicates.index[0], 'reps_pattern'] = reps
+            #     df.drop_duplicates(keep='first')
+            #     reps_pattern = df.to_dict(orient='records')
+
+        flat_verses = ' '.join(verses)
+        if len(flat_verses) > 0:
+            lang = detect(' '.join(verses))
+            try:
+                hino['text'][lang].append({
+                    'reps_pattern': reps_pattern,
+                    'verses': verses
+                })
+            except KeyError:
+                hino['text'][lang] = []
+                hino['text'][lang].append({
+                    'reps_pattern': reps_pattern,
+                    'verses': verses
+                })
+
+    # Infine controllo se ci sono elementi che meritino un controllo manuale.
+
+    hino = flag_hino(hino)
+
     return hino
 
 def download_person(url, save_hinario=False, save_hino=False):
@@ -157,6 +277,94 @@ def download_person(url, save_hinario=False, save_hino=False):
         del hinario['person']
         person['hinarios'].append(hinario)
     return person
+
+def flag_hino(hino):
+    """ Controlla che non ci siano stranezze da controllare a mano. """
+    flags = []
+
+    # Per prima cosa elimino le lingue pt e en, che sono le più frequenti. Se
+    # resta qualcosa, allora significa che ci potrebbero essere lingue errate.
+
+    lang_hino = dict(hino['text'])
+    lang_hino.pop('pt', None)
+    lang_hino.pop('en', None)
+    if len(lang_hino) > 0:
+        flags.append('lang')
+
+    # Infine calcolo la lunghezza delle strofe.  Se sono presenti strofe con un
+    # numero differente, è meglio controllare.
+    lengths = []
+    re_inline_reps = re.compile('.*[0-9]+x.*')
+    try:
+        for stanza in hino['text']['pt']:
+            lengths.append(len(stanza['verses']))
+            if (('' in stanza['verses']) and
+                ('empty' not in flags)):
+                flags.append('empty')
+            if ((len(list(filter(re_inline_reps.match, stanza['verses']))) > 0) and
+                ('inline_rep' not in flags)):
+                flags.append('inline_rep')
+        if any(length != lengths[0] for length in lengths):
+            flags.append('length')
+    except (IndexError, KeyError):
+        flags.append('other')
+
+    if len(flags) > 0:
+        hino['flags'] = flags
+
+    return hino
+
+def get_parent_with_class(element, parent_class):
+    """ Torna indietro fino a che non ha trovato il genitore con una classe
+        specifica e restituisce quell'elemento.
+    """
+    if parent_class in element.parent.attrs['class']:
+        return element.parent
+    return get_parent_with_class(element.parent, parent_class)
+
+def get_reps_pattern(bars, verses_list):
+    """ Estrare la ripetizione. """
+    reps_pattern = []
+    for bar in bars:
+
+        # Se un hymn-bar-empty contiene uno o più hymn-bar-, allora è un
+        # riempitivo e dobbiamo ignorarlo.
+
+        if (('hymn-bar-empty' in bar.attrs['class']) and
+            (len(bar.select('[class*=hymn-bar-]')) > 0)):
+            continue
+
+        bar_verses = split_verses(bar.select('.hymn-words'))
+
+        if len(bar_verses) < 1:
+            continue
+
+        bar_rep = 0
+        bar_index = verses_list.index(bar_verses[0]) + 1
+        if 'hymn-bar-empty' in bar.attrs['class']:
+            bar_rep = 1
+        else:
+            bar_rep = 2
+
+        # La voce 'raw' viene inserita per poter, all'occorrenza, recuperare
+        # il valore della ripetizione quando è indicata a margine.  Prima che
+        # venga salvato nell'hino tutti i 'raw' saranno rimossi.
+
+        reps_pattern.append({
+            # 'raw' : bar,
+            'from': bar_index,
+            'to': bar_index + len(bar_verses) - 1,
+            'reps': bar_rep
+        })
+    return reps_pattern
+
+def split_verses(block_of_text):
+    """ Restituisce una lista di versi.
+    """
+    verses = []
+    for block in block_of_text:
+        verses.extend(re.sub(' +', ' ', block.get_text().strip()).split('\n'))
+    return [verse.strip() for verse in verses if (verse != '') and (verse != '\xa0')]
 
 def main():
     """ Funzione principale. """
@@ -208,14 +416,20 @@ def main():
                 raise ValueError(f"{o.netloc} non è supportato.")
             match o.path.split('/')[1]:
                 case 'hinarios':
-                    catalog = download_catalog(url, save_hinario=args.save_hinario, save_hino=args.save_hino)
+                    catalog = download_catalog(url,
+                                               save_hinario=args.save_hinario,
+                                               save_hino=args.save_hino
+                                               )
                     if args.save_catalog:
                         catalog_json = json.dumps(catalog, indent=4)
                         filename = f"./{SAVE_DIR}/{catalog['title']}.json"
                         with open(filename, 'w', encoding='utf-8') as outfile:
                             outfile.write(catalog_json)
                 case 'person':
-                    person = download_person(url, save_hinario=args.save_hinario, save_hino=args.save_hino)
+                    person = download_person(url,
+                                             save_hinario=args.save_hinario,
+                                             save_hino=args.save_hino
+                                             )
                     if args.save_person:
                         person_json = json.dumps(person, indent=4)
                         filename = f"./{SAVE_DIR}/{person['name']}.json"
