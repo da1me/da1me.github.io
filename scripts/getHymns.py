@@ -54,8 +54,15 @@ def download_hinario(url, save_hino=False):
     req = requests.get(url, timeout=10)
     soup = BeautifulSoup(req.content, 'html.parser')
 
+    person = ''
+
+    try:
+        person = soup.select('.breadcrumb li:nth-last-of-type(2) a')[0].get_text().strip()
+    except IndexError:
+        person = 'Compilation'
+
     hinario = {
-        'person': soup.select('.breadcrumb li:nth-last-of-type(2) a')[0].get_text().strip(),
+        'person': person,
         'title': soup.select('.page_breadcrumbs h2')[0].find(string=True, recursive=False).get_text().strip(),
         'hinos': []
     }
