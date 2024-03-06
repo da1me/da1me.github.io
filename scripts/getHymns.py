@@ -294,12 +294,16 @@ def flag_hino(hino):
     # Infine calcolo la lunghezza delle strofe.  Se sono presenti strofe con un
     # numero differente, è meglio controllare.
     lengths = []
+    re_inline_reps = re.compile('.*[0-9]+x.*')
     try:
         for stanza in hino['text']['pt']:
             lengths.append(len(stanza['verses']))
             if (('' in stanza['verses']) and
                 ('empty' not in flags)):
                 flags.append('empty')
+            if ((len(list(filter(re_inline_reps.match, stanza['verses']))) > 0) and
+                ('inline_rep' not in flags)):
+                flags.append('inline_rep')
         if any(length != lengths[0] for length in lengths):
             flags.append('length')
     except (IndexError, KeyError):
