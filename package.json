@@ -4,11 +4,12 @@
     "standard": "*"
   },
   "scripts": {
-    "build": "browserify scripts/main.js > scripts/bundle.js",
+    "build": "npx browserify scripts/main.js > scripts/bundle.js",
     "dev": "nodemon app.js --exec 'standard && npm run build && node'",
     "fixme": "standard --fix"
   },
   "dependencies": {
+    "browserify": "^17.0.1",
     "jquery": "^3.7.1",
     "wordcloud": "^1.2.2"
   },
