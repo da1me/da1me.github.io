@@ -12321,14 +12321,30 @@ function updateSimilarHinarios (index) {
 }
 
 function computeStats (hinario) {
+  const hymnTokenCounts = hinario.hinos.map(h => {
+    if (h.tokens && h.tokens.pt) return h.tokens.pt.length
+    return 0
+  })
   const tokens = hinario.hinos.reduce((a, h) => {
     if (h.tokens && h.tokens.pt) return [...a, ...h.tokens.pt]
     return a
   }, [])
   const hymnsCount = hinario.hinos.length
   const tokenCount = tokens.length
-  const uniqueTokens = new Set(tokens.map(t => t.toLowerCase())).size
-  return { hymnsCount, tokenCount, uniqueTokens }
+  const uniqueTokens = new Set(tokens.map(t => t.toLowerCase()))
+  const avgTokensPerHymn = hymnsCount ? tokenCount / hymnsCount : 0
+  const uniqueTokenRatio = tokenCount ? uniqueTokens.size / tokenCount : 0
+  const longestHymn = hymnTokenCounts.length ? Math.max(...hymnTokenCounts) : 0
+  const shortestHymn = hymnTokenCounts.length ? Math.min(...hymnTokenCounts) : 0
+  return {
+    hymnsCount,
+    tokenCount,
+    uniqueTokens: uniqueTokens.size,
+    avgTokensPerHymn,
+    uniqueTokenRatio,
+    longestHymn,
+    shortestHymn
+  }
 }
 
 function updateStats (index) {
@@ -12339,6 +12355,10 @@ function updateStats (index) {
   $('<li/>').text(`Hymns: ${stats.hymnsCount}`).appendTo(ul)
   $('<li/>').text(`Total words: ${stats.tokenCount}`).appendTo(ul)
   $('<li/>').text(`Unique words: ${stats.uniqueTokens}`).appendTo(ul)
+  $('<li/>').text(`Avg words/hymn: ${stats.avgTokensPerHymn.toFixed(2)}`).appendTo(ul)
+  $('<li/>').text(`Unique/word ratio: ${stats.uniqueTokenRatio.toFixed(2)}`).appendTo(ul)
+  $('<li/>').text(`Longest hymn: ${stats.longestHymn} words`).appendTo(ul)
+  $('<li/>').text(`Shortest hymn: ${stats.shortestHymn} words`).appendTo(ul)
 }
 
 },{"jquery":1,"wordcloud":2}]},{},[3]);
