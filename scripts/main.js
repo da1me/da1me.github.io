@@ -15,6 +15,16 @@ $(function () {
   $('#wordModal').on('click', e => {
     if (e.target.id === 'wordModal') $('#wordModal').hide()
   })
+  $('#fullscreenBtn').on('click', () => {
+    const canvas = document.getElementById('contentCanvas')
+    if (canvas.requestFullscreen) {
+      canvas.requestFullscreen()
+    } else if (canvas.webkitRequestFullscreen) {
+      canvas.webkitRequestFullscreen()
+    } else if (canvas.msRequestFullscreen) {
+      canvas.msRequestFullscreen()
+    }
+  })
 })
 
 // load the JSON file from the hymns
