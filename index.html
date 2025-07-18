@@ -22,7 +22,11 @@
         <button id="fullscreenBtn" title="View wordcloud full screen">&#x26F6;</button>
       </div>
       <div id="similarDiv"></div>
-        <div id="statsDiv"></div>
+      <div id="statsDiv"></div>
+    </div>
+    <div id="corpusContainer">
+      <div id="corpusStats"></div>
+      <div id="authorNetwork"></div>
     </div>
     <div id="wordModal" class="modal">
       <div class="modal-content">
@@ -30,6 +34,7 @@
         <p id="modalWord"></p>
       </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
     <script type="module" src="scripts/bundle.js"></script>
     <input id="file-input" type="file" name="name" style="display: none;" />
 
@@ -107,6 +112,28 @@
 #statsDiv ul {
   list-style-type: none;
   padding-left: 0;
+}
+
+#corpusContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin-top: 2%;
+}
+
+#corpusStats {
+  max-width: 300px;
+}
+
+#corpusStats ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+#authorNetwork {
+  max-width: 400px;
 }
 
 #selectDiv select {
