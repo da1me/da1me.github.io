@@ -4,6 +4,19 @@ const WordCloud = require('wordcloud')
 window.jQuery = $
 let hinarioSets = []
 
+function showWordDetail (item) {
+  const [word, count] = item
+  $('#modalWord').text(`${word} - ${count}x`)
+  $('#wordModal').show()
+}
+
+$(function () {
+  $('#wordModal .close').on('click', () => $('#wordModal').hide())
+  $('#wordModal').on('click', e => {
+    if (e.target.id === 'wordModal') $('#wordModal').hide()
+  })
+})
+
 // load the JSON file from the hymns
 // plot hymn words according to the selected hymn
 $.getJSON('hinos/td.json', function (data) {
@@ -66,7 +79,11 @@ function plotWordcloud (hinario) {
   //   html: items.join('')
   // }).appendTo('#contentDiv')
   const list = tokensHist.map(i => [i.t, i.count])
-  WordCloud(document.getElementById('contentCanvas'), { list, weightFactor: 100 / tokensHist[0].count })
+  WordCloud(document.getElementById('contentCanvas'), {
+    list,
+    weightFactor: 100 / tokensHist[0].count,
+    click: showWordDetail
+  })
 
   window.th = { tokensHist, list }
 }
