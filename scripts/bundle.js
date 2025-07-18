@@ -11960,6 +11960,7 @@ console.log('scripts/main.js being executed YAUIASHUDAS')
 const $ = require('jquery')
 const WordCloud = require('wordcloud')
 window.jQuery = $
+let hinarioSets = []
 
 // load the JSON file from the hymns
 // plot hymn words according to the selected hymn
@@ -11981,18 +11982,21 @@ $.getJSON('hinos/td.json', function (data) {
       // hinário
       // cada hino
       plotWordcloud(e)
+      updateSimilarHinarios(Number(ii))
     })
 
   // const cd = $('<div/>', { id: 'contentDiv' }).appendTo('body')
   // $('<canvas/>', { id: 'contentCanvas', width: '1000' }).appendTo(cd)
 
   window.adata = data
+  hinarioSets = data.hinarios.map(h => collectTokenSet(h))
   data.hinarios.forEach((i, count) => {
     const aname = `${i.title} - ${i.person}`
     s.append($('<option/>', { class: 'pres' }).val(count).html(aname))
     $('#loading').hide()
   })
   plotWordcloud(data.hinarios[0])
+  updateSimilarHinarios(0)
 })
 
 function plotWordcloud (hinario) {
@@ -12244,5 +12248,36 @@ const punct = [
 ]
 
 const stopWords_ = [...stopWords, ...punct]
+
+function collectTokenSet (hinario) {
+  const tokens = hinario.hinos.reduce((a, h) => {
+    if (h.tokens && h.tokens.pt) return [...a, ...h.tokens.pt]
+    return a
+  }, [])
+  const lower = tokens.map(t => t.toLowerCase())
+  return new Set(lower.filter(t => !stopWords_.includes(t)))
+}
+
+function jaccard (setA, setB) {
+  const inter = [...setA].filter(x => setB.has(x))
+  const union = new Set([...setA, ...setB])
+  return inter.length / union.size
+}
+
+function updateSimilarHinarios (index) {
+  const base = hinarioSets[index]
+  const sims = hinarioSets.map((set, i) => {
+    if (i === index) return null
+    return { i, s: jaccard(base, set) }
+  }).filter(Boolean).sort((a, b) => b.s - a.s).slice(0, 3)
+  const div = $('#similarDiv').empty()
+  $('<h3/>').text('Similar Hymnals').appendTo(div)
+  const ul = $('<ul/>').appendTo(div)
+  sims.forEach(m => {
+    const h = window.adata.hinarios[m.i]
+    const label = `${h.title} - ${h.person} (${m.s.toFixed(2)})`
+    $('<li/>').text(label).appendTo(ul)
+  })
+}
 
 },{"jquery":1,"wordcloud":2}]},{},[3]);
