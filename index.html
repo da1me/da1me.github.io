@@ -17,7 +17,10 @@
     <div id="loading"><br/><br/><div style="padding-top:30%">LOADING...</div></div>
     <div id="selectDiv" class="centered"></div>
     <div id="contentContainer">
-      <canvas id="contentCanvas" width="1000" height="500"></canvas>
+      <div id="canvasContainer">
+        <canvas id="contentCanvas" width="1000" height="500"></canvas>
+        <button id="fullscreenBtn" title="View wordcloud full screen">&#x26F6;</button>
+      </div>
       <div id="similarDiv"></div>
     </div>
     <div id="wordModal" class="modal">
@@ -66,6 +69,19 @@
   width: 100%;
   border: 1px solid #ccc;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#canvasContainer {
+  position: relative;
+  display: inline-block;
+}
+
+#fullscreenBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  font-size: 0.8em;
 }
 
 #similarDiv {
