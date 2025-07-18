@@ -15,16 +15,13 @@
   </head>
 <body style="margin:0;font-family:Helvetica, arial">
     <div id="loading"><br/><br/><div style="padding-top:30%">LOADING...</div></div>
-    <div id="selectDiv" style="text-align:center;margin-top:2%">
+    <div id="selectDiv" class="centered"></div>
+    <div id="contentContainer">
+      <canvas id="contentCanvas" width="1000" height="500"></canvas>
+      <div id="similarDiv"></div>
     </div>
-    <div>
-      <canvas id="contentCanvas" width="1000" height="500" style="width:100%">
-      </canvas>
-    </div>
-    <div id="similarDiv" style="text-align:center;margin-top:2%">
-    </div>
-  <script type="module" src="scripts/bundle.js"></script>
-  <input id="file-input" type="file" name="name" style="display: none;" />
+    <script type="module" src="scripts/bundle.js"></script>
+    <input id="file-input" type="file" name="name" style="display: none;" />
 
 </body>
 <style type="text/css">
@@ -42,6 +39,41 @@
   background-position: center;
   text-align: center;
   font-size: 24px;
+}
+
+.centered {
+  text-align: center;
+  margin-top: 2%;
+}
+
+#contentContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin-top: 2%;
+}
+
+#contentCanvas {
+  max-width: 600px;
+  width: 100%;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#similarDiv {
+  max-width: 300px;
+}
+
+#similarDiv ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+#selectDiv select {
+  padding: 5px;
+  font-size: 1em;
 }
 
 /* The Modal (background) */
