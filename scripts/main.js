@@ -59,6 +59,7 @@ $.getJSON('hinos/td.json', function (data) {
       // cada hino
       plotWordcloud(e)
       updateSimilarHinarios(Number(ii))
+      updateStats(Number(ii))
     })
 
   // const cd = $('<div/>', { id: 'contentDiv' }).appendTo('body')
@@ -73,6 +74,7 @@ $.getJSON('hinos/td.json', function (data) {
   })
   plotWordcloud(data.hinarios[0])
   updateSimilarHinarios(0)
+  updateStats(0)
 })
 
 function plotWordcloud (hinario) {
@@ -358,4 +360,25 @@ function updateSimilarHinarios (index) {
     const label = `${h.title} - ${h.person} (${m.s.toFixed(2)})`
     $('<li/>').text(label).appendTo(ul)
   })
+}
+
+function computeStats (hinario) {
+  const tokens = hinario.hinos.reduce((a, h) => {
+    if (h.tokens && h.tokens.pt) return [...a, ...h.tokens.pt]
+    return a
+  }, [])
+  const hymnsCount = hinario.hinos.length
+  const tokenCount = tokens.length
+  const uniqueTokens = new Set(tokens.map(t => t.toLowerCase())).size
+  return { hymnsCount, tokenCount, uniqueTokens }
+}
+
+function updateStats (index) {
+  const stats = computeStats(window.adata.hinarios[index])
+  const div = $('#statsDiv').empty()
+  $('<h3/>').text('Hymnal Stats').appendTo(div)
+  const ul = $('<ul/>').appendTo(div)
+  $('<li/>').text(`Hymns: ${stats.hymnsCount}`).appendTo(ul)
+  $('<li/>').text(`Total words: ${stats.tokenCount}`).appendTo(ul)
+  $('<li/>').text(`Unique words: ${stats.uniqueTokens}`).appendTo(ul)
 }
