@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "browserify": "^17.0.1",
+    "express": "^5.1.0",
     "jquery": "^3.7.1",
     "wordcloud": "^1.2.2"
   },
