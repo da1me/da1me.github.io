@@ -41,12 +41,31 @@
   height: 100vh;
 }
 
+:fullscreen #authorNetwork {
+  max-width: none;
+  width: 100vw;
+  height: 100vh;
+}
+
 #canvasContainer {
   position: relative;
   display: inline-block;
 }
 
+#networkContainer {
+  position: relative;
+  display: inline-block;
+}
+
 #fullscreenBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  font-size: 0.8em;
+}
+
+#networkFullscreenBtn {
   position: absolute;
   top: 10px;
   right: 10px;

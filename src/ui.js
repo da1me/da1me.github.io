@@ -12,7 +12,7 @@ export function setupUI (onControlsChange = () => {}) {
     $('#wordModal').on('click', e => {
       if (e.target.id === 'wordModal') $('#wordModal').hide()
     })
-    $('#fullscreenBtn').on('click', () => {
+    function toggleFullscreen () {
       const doc = document
       if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
         const elem = document.documentElement
@@ -32,7 +32,10 @@ export function setupUI (onControlsChange = () => {}) {
           doc.msExitFullscreen()
         }
       }
-    })
+    }
+
+    $('#fullscreenBtn').on('click', toggleFullscreen)
+    $('#networkFullscreenBtn').on('click', toggleFullscreen)
 
     $('#wordCount').on('change', onControlsChange)
     $('#includeStopwords').on('change', onControlsChange)

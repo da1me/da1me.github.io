@@ -12239,7 +12239,7 @@ function setupUI(onControlsChange = () => {}) {
     (0, _jquery.default)('#wordModal').on('click', e => {
       if (e.target.id === 'wordModal') (0, _jquery.default)('#wordModal').hide();
     });
-    (0, _jquery.default)('#fullscreenBtn').on('click', () => {
+    function toggleFullscreen() {
       const doc = document;
       if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
         const elem = document.documentElement;
@@ -12259,7 +12259,9 @@ function setupUI(onControlsChange = () => {}) {
           doc.msExitFullscreen();
         }
       }
-    });
+    }
+    (0, _jquery.default)('#fullscreenBtn').on('click', toggleFullscreen);
+    (0, _jquery.default)('#networkFullscreenBtn').on('click', toggleFullscreen);
     (0, _jquery.default)('#wordCount').on('change', onControlsChange);
     (0, _jquery.default)('#includeStopwords').on('change', onControlsChange);
   });
