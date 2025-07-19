@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import { setupUI } from './ui.js'
+import { setupUI, getWordcloudOptions } from './ui.js'
 import { plotWordcloud } from './wordcloud.js'
 import {
   collectTokenSet,
@@ -12,7 +12,13 @@ import { computeAuthorSets, drawAuthorNetwork } from './network.js'
 
 window.jQuery = $
 
-setupUI()
+let currentHinario
+function updateWordcloud () {
+  if (!currentHinario) return
+  plotWordcloud(currentHinario, getWordcloudOptions())
+}
+
+setupUI(updateWordcloud)
 
 let hinarioSets = []
 let corpusStats
@@ -30,10 +36,10 @@ $.getJSON('hinos/td.json', function (data) {
     .on('change', aself => {
       const ii = aself.currentTarget.value
       if (ii === '-1') return
-      const e = data.hinarios[ii]
-      plotWordcloud(e)
+      currentHinario = data.hinarios[ii]
+      updateWordcloud()
       updateSimilarHinarios(Number(ii), hinarioSets, data.hinarios)
-      updateStats(e)
+      updateStats(currentHinario)
     })
 
   window.adata = data
@@ -47,7 +53,8 @@ $.getJSON('hinos/td.json', function (data) {
     s.append($('<option/>', { class: 'pres' }).val(count).html(aname))
     $('#loading').hide()
   })
-  plotWordcloud(data.hinarios[0])
+  currentHinario = data.hinarios[0]
+  updateWordcloud()
   updateSimilarHinarios(0, hinarioSets, data.hinarios)
-  updateStats(data.hinarios[0])
+  updateStats(currentHinario)
 })

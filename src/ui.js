@@ -6,7 +6,7 @@ export function showWordDetail (item) {
   $('#wordModal').show()
 }
 
-export function setupUI () {
+export function setupUI (onControlsChange = () => {}) {
   $(function () {
     $('#wordModal .close').on('click', () => $('#wordModal').hide())
     $('#wordModal').on('click', e => {
@@ -33,5 +33,15 @@ export function setupUI () {
         }
       }
     })
+
+    $('#wordCount').on('change', onControlsChange)
+    $('#includeStopwords').on('change', onControlsChange)
   })
+}
+
+export function getWordcloudOptions () {
+  return {
+    maxWords: Number($('#wordCount').val()) || undefined,
+    includeStopWords: $('#includeStopwords').is(':checked')
+  }
 }
