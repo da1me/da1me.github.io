@@ -41,8 +41,9 @@ export function collectTokenSet (hinario) {
 }
 
 export function jaccard (setA, setB) {
-  const inter = [...setA].filter(x => setB.has(x))
   const union = new Set([...setA, ...setB])
+  if (union.size === 0) return 0
+  const inter = [...setA].filter(x => setB.has(x))
   return inter.length / union.size
 }
 
