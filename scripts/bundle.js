@@ -11965,11 +11965,17 @@ var _stats = require("./stats.js");
 var _network = require("./network.js");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 window.jQuery = _jquery.default;
-(0, _ui.setupUI)();
+let currentHinario;
+function updateWordcloud() {
+  if (!currentHinario) return;
+  (0, _wordcloud.plotWordcloud)(currentHinario, (0, _ui.getWordcloudOptions)());
+}
+(0, _ui.setupUI)(updateWordcloud);
 let hinarioSets = [];
 let corpusStats;
 let authorSets;
 _jquery.default.getJSON('hinos/td.json', function (data) {
+  // drop hymnals that lack tokens or have the unwanted title
   data.hinarios = data.hinarios.filter(h => {
     if (h.title === 'O Mestre Diz') return false;
     return h.hinos.some(hi => hi.tokens && hi.tokens.pt && hi.tokens.pt.length);
@@ -11982,16 +11988,21 @@ _jquery.default.getJSON('hinos/td.json', function (data) {
   }).appendTo('#selectDiv').attr('title', 'Select hymn to analyze.').on('change', aself => {
     const ii = aself.currentTarget.value;
     if (ii === '-1') return;
-    const e = data.hinarios[ii];
-    (0, _wordcloud.plotWordcloud)(e);
+    currentHinario = data.hinarios[ii];
+    updateWordcloud();
     (0, _stats.updateSimilarHinarios)(Number(ii), hinarioSets, data.hinarios);
-    (0, _stats.updateStats)(e);
+    (0, _stats.updateStats)(currentHinario);
   });
   window.adata = data;
   hinarioSets = data.hinarios.map(h => (0, _stats.collectTokenSet)(h));
   corpusStats = (0, _stats.computeCorpusStats)(data.hinarios);
   authorSets = (0, _network.computeAuthorSets)(data.hinarios);
   (0, _stats.updateCorpusStats)(corpusStats);
+  (0, _jquery.default)('#thresholdValue').text((0, _jquery.default)('#jaccardThreshold').val());
+  (0, _jquery.default)('#jaccardThreshold').on('input change', () => {
+    (0, _jquery.default)('#thresholdValue').text((0, _jquery.default)('#jaccardThreshold').val());
+    (0, _network.drawAuthorNetwork)(authorSets);
+  });
   (0, _network.drawAuthorNetwork)(authorSets);
   data.hinarios.forEach((i, count) => {
     const aname = `${i.title} - ${i.person}`;
@@ -12000,9 +12011,10 @@ _jquery.default.getJSON('hinos/td.json', function (data) {
     }).val(count).html(aname));
     (0, _jquery.default)('#loading').hide();
   });
-  (0, _wordcloud.plotWordcloud)(data.hinarios[0]);
+  currentHinario = data.hinarios[0];
+  updateWordcloud();
   (0, _stats.updateSimilarHinarios)(0, hinarioSets, data.hinarios);
-  (0, _stats.updateStats)(data.hinarios[0]);
+  (0, _stats.updateStats)(currentHinario);
 });
 
 },{"./network.js":4,"./stats.js":5,"./ui.js":6,"./wordcloud.js":7,"jquery":1}],4:[function(require,module,exports){
@@ -12014,7 +12026,9 @@ Object.defineProperty(exports, "__esModule", {
 exports.computeAuthorNetwork = computeAuthorNetwork;
 exports.computeAuthorSets = computeAuthorSets;
 exports.drawAuthorNetwork = drawAuthorNetwork;
+var _jquery = _interopRequireDefault(require("jquery"));
 var _stats = require("./stats.js");
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 /* global d3 */
 
 function computeAuthorSets(hinarios) {
@@ -12030,7 +12044,7 @@ function computeAuthorSets(hinarios) {
   });
   return Object.entries(authors).map(([name, toks]) => [name, new Set(toks)]);
 }
-function computeAuthorNetwork(authorSets) {
+function computeAuthorNetwork(authorSets, threshold = 0.05) {
   const nodes = authorSets.map(([name], i) => ({
     id: i,
     name
@@ -12039,7 +12053,7 @@ function computeAuthorNetwork(authorSets) {
   for (let i = 0; i < authorSets.length; i++) {
     for (let j = i + 1; j < authorSets.length; j++) {
       const s = (0, _stats.jaccard)(authorSets[i][1], authorSets[j][1]);
-      if (s > 0.05) links.push({
+      if (s >= threshold) links.push({
         source: i,
         target: j,
         weight: s
@@ -12052,10 +12066,11 @@ function computeAuthorNetwork(authorSets) {
   };
 }
 function drawAuthorNetwork(authorSets) {
+  const threshold = Number((0, _jquery.default)('#jaccardThreshold').val()) || 0.05;
   const {
     nodes,
     links
-  } = computeAuthorNetwork(authorSets);
+  } = computeAuthorNetwork(authorSets, threshold);
   const width = 400;
   const height = 300;
   const svg = d3.select('#authorNetwork').html('').append('svg').attr('width', width).attr('height', height);
@@ -12084,7 +12099,7 @@ function drawAuthorNetwork(authorSets) {
   }
 }
 
-},{"./stats.js":5}],5:[function(require,module,exports){
+},{"./stats.js":5,"jquery":1}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12112,8 +12127,9 @@ function collectTokenSet(hinario) {
   return new Set(lower.filter(t => !stopWords_.includes(t)));
 }
 function jaccard(setA, setB) {
-  const inter = [...setA].filter(x => setB.has(x));
   const union = new Set([...setA, ...setB]);
+  if (union.size === 0) return 0;
+  const inter = [...setA].filter(x => setB.has(x));
   return inter.length / union.size;
 }
 function computeStats(hinario) {
@@ -12207,6 +12223,7 @@ function updateSimilarHinarios(index, hinarioSets, hinarios) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getWordcloudOptions = getWordcloudOptions;
 exports.setupUI = setupUI;
 exports.showWordDetail = showWordDetail;
 var _jquery = _interopRequireDefault(require("jquery"));
@@ -12216,7 +12233,7 @@ function showWordDetail(item) {
   (0, _jquery.default)('#modalWord').text(`${word} - ${count}x`);
   (0, _jquery.default)('#wordModal').show();
 }
-function setupUI() {
+function setupUI(onControlsChange = () => {}) {
   (0, _jquery.default)(function () {
     (0, _jquery.default)('#wordModal .close').on('click', () => (0, _jquery.default)('#wordModal').hide());
     (0, _jquery.default)('#wordModal').on('click', e => {
@@ -12243,7 +12260,15 @@ function setupUI() {
         }
       }
     });
+    (0, _jquery.default)('#wordCount').on('change', onControlsChange);
+    (0, _jquery.default)('#includeStopwords').on('change', onControlsChange);
   });
+}
+function getWordcloudOptions() {
+  return {
+    maxWords: Number((0, _jquery.default)('#wordCount').val()) || undefined,
+    includeStopWords: (0, _jquery.default)('#includeStopwords').is(':checked')
+  };
 }
 
 },{"jquery":1}],7:[function(require,module,exports){
@@ -12257,7 +12282,11 @@ var _wordcloud = _interopRequireDefault(require("wordcloud"));
 var _stats = require("./stats.js");
 var _ui = require("./ui.js");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-function plotWordcloud(hinario) {
+function plotWordcloud(hinario, opts = {}) {
+  const {
+    maxWords,
+    includeStopWords = false
+  } = opts;
   function getTokens(tokens) {
     if (tokens && 'pt' in tokens) {
       return tokens.pt;
@@ -12265,17 +12294,28 @@ function plotWordcloud(hinario) {
     return [];
   }
   const tokens = hinario.hinos.reduce((a, h) => [...a, ...getTokens(h.tokens)], []);
-  const tokensLower = tokens.map(t => t.toLowerCase());
-  const tokensSet = [...new Set(tokensLower)].filter(t => !_stats.stopWords_.includes(t));
-  const tokensHist = tokensSet.map(t => {
-    const count = tokensLower.filter(tt => t === tt).length;
-    return {
-      t,
-      count
-    };
+  let tokensLower = tokens.map(t => t.toLowerCase());
+  if (!includeStopWords) {
+    tokensLower = tokensLower.filter(t => !_stats.stopWords_.includes(t));
+  }
+  const freq = {};
+  tokensLower.forEach(t => {
+    freq[t] = (freq[t] || 0) + 1;
   });
+  let tokensHist = Object.entries(freq).map(([t, count]) => ({
+    t,
+    count
+  }));
   tokensHist.sort((a, b) => a.count > b.count ? -1 : 1);
+  const limit = maxWords || tokensHist.length;
+  tokensHist = tokensHist.slice(0, limit);
   const list = tokensHist.map(i => [i.t, i.count]);
+  if (!tokensHist.length) {
+    (0, _wordcloud.default)(document.getElementById('contentCanvas'), {
+      list: []
+    });
+    return;
+  }
   (0, _wordcloud.default)(document.getElementById('contentCanvas'), {
     list,
     weightFactor: 100 / tokensHist[0].count,
