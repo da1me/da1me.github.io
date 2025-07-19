@@ -4,12 +4,11 @@ import { plotWordcloud } from './wordcloud.js'
 import {
   collectTokenSet,
   computeCorpusStats,
-  computeAuthorSets,
   updateCorpusStats,
   updateStats,
   updateSimilarHinarios
 } from './stats.js'
-import { drawAuthorNetwork } from './network.js'
+import { computeAuthorSets, drawAuthorNetwork } from './network.js'
 
 window.jQuery = $
 
