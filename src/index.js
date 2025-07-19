@@ -47,6 +47,11 @@ $.getJSON('hinos/td.json', function (data) {
   corpusStats = computeCorpusStats(data.hinarios)
   authorSets = computeAuthorSets(data.hinarios)
   updateCorpusStats(corpusStats)
+  $('#thresholdValue').text($('#jaccardThreshold').val())
+  $('#jaccardThreshold').on('input change', () => {
+    $('#thresholdValue').text($('#jaccardThreshold').val())
+    drawAuthorNetwork(authorSets)
+  })
   drawAuthorNetwork(authorSets)
   data.hinarios.forEach((i, count) => {
     const aname = `${i.title} - ${i.person}`

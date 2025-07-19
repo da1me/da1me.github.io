@@ -1,3 +1,4 @@
+import $ from 'jquery'
 import { jaccard, stopWords_ } from './stats.js'
 /* global d3 */
 
@@ -15,20 +16,21 @@ export function computeAuthorSets (hinarios) {
   return Object.entries(authors).map(([name, toks]) => [name, new Set(toks)])
 }
 
-export function computeAuthorNetwork (authorSets) {
+export function computeAuthorNetwork (authorSets, threshold = 0.05) {
   const nodes = authorSets.map(([name], i) => ({ id: i, name }))
   const links = []
   for (let i = 0; i < authorSets.length; i++) {
     for (let j = i + 1; j < authorSets.length; j++) {
       const s = jaccard(authorSets[i][1], authorSets[j][1])
-      if (s > 0.05) links.push({ source: i, target: j, weight: s })
+      if (s >= threshold) links.push({ source: i, target: j, weight: s })
     }
   }
   return { nodes, links }
 }
 
 export function drawAuthorNetwork (authorSets) {
-  const { nodes, links } = computeAuthorNetwork(authorSets)
+  const threshold = Number($('#jaccardThreshold').val()) || 0.05
+  const { nodes, links } = computeAuthorNetwork(authorSets, threshold)
   const width = 400
   const height = 300
   const svg = d3.select('#authorNetwork').html('').append('svg')
