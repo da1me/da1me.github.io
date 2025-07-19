@@ -16,6 +16,11 @@
 <body style="margin:0;font-family:Helvetica, arial">
     <div id="loading"><br/><br/><div style="padding-top:30%">LOADING...</div></div>
     <div id="selectDiv" class="centered"></div>
+    <div id="controls" class="centered">
+      <label for="wordCount">Words:</label>
+      <input id="wordCount" type="number" value="100" min="10" max="500" />
+      <label><input type="checkbox" id="includeStopwords" /> include stop words</label>
+    </div>
     <div id="contentContainer">
       <div id="canvasContainer">
         <canvas id="contentCanvas" width="1000" height="500"></canvas>
@@ -139,6 +144,15 @@
 #selectDiv select {
   padding: 5px;
   font-size: 1em;
+}
+
+#controls input[type="number"] {
+  padding: 5px;
+  font-size: 1em;
+  width: 80px;
+}
+#controls label {
+  margin-right: 10px;
 }
 
 /* The Modal (background) */
