@@ -1,10 +1,11 @@
 {
   "name": "da1me",
   "devDependencies": {
+    "esmify": "^2.1.1",
     "standard": "*"
   },
   "scripts": {
-    "build": "npx browserify scripts/main.js > scripts/bundle.js",
+    "build": "npx browserify src/index.js -p esmify > scripts/bundle.js",
     "dev": "standard && npm run build && node app.js",
     "fixme": "standard --fix"
   },
