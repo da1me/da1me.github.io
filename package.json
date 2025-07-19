@@ -1,12 +1,15 @@
 {
   "name": "da1me",
   "devDependencies": {
-    "standard": "*"
+    "standard": "*",
+    "mocha": "^10.2.0",
+    "chai": "^4.3.6"
   },
   "scripts": {
     "build": "npx browserify scripts/main.js > scripts/bundle.js",
     "dev": "nodemon app.js --exec 'standard && npm run build && node'",
-    "fixme": "standard --fix"
+    "fixme": "standard --fix",
+    "test": "mocha tests"
   },
   "dependencies": {
     "browserify": "^17.0.1",
