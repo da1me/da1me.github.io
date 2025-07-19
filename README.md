@@ -1,15 +1,47 @@
 # da1me.github.io
 da1me literature analysis - routines and website
 
-## usage
+## Setup
 
-### scrapping
-When scrapping is 100%, the data should be fetched using a simple:
-    $ make scrape
+Install the Python dependencies:
 
-When developing/debugging the scrapper, use something like `python3.11 -m IPython` then execute the script with `run scripts/getHymns.py`, and inspect objects in IPython. Change script code and run it again inside IPython.
+```bash
+pip install -r requirements.txt
+```
 
-### website
-For now a dummy website available at https://da1me.github.io/
+Install the Node packages:
+
+```bash
+npm i
+```
+
+## Usage
+
+### Scraping
+Fetch the hymn data with:
+
+```bash
+make scrape
+```
+
+During development you can manually run the script from an IPython
+session:
+
+```bash
+python3.11 -m IPython
+%run scripts/getHymns.py
+```
+
+### Website
+Start the development web server (rebuilds on changes) with:
+
+```bash
+npm run dev
+```
+
+The compiled site will then be served on <http://localhost:8092/>.
+
+For now a dummy website is also available at
+<https://da1me.github.io/>
 
 :::
