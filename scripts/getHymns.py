@@ -9,6 +9,12 @@ import json
 import requests
 from bs4 import BeautifulSoup
 import nltk as k
+
+# Ensure the punkt tokenizer is available for word tokenization
+try:
+    k.data.find('tokenizers/punkt')
+except LookupError:
+    k.download('punkt')
 from langdetect import detect
 from deepmerge import always_merger
 
