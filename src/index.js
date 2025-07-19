@@ -19,6 +19,11 @@ let corpusStats
 let authorSets
 
 $.getJSON('hinos/td.json', function (data) {
+  // drop hymnals that lack tokens or have the unwanted title
+  data.hinarios = data.hinarios.filter(h => {
+    if (h.title === 'O Mestre Diz') return false
+    return h.hinos.some(hi => hi.tokens && hi.tokens.pt && hi.tokens.pt.length)
+  })
   $('<label/>', { for: 'mselect' }).html('select hymnal: ').appendTo('#selectDiv')
   const s = $('<select/>', { id: 'mselect' }).appendTo('#selectDiv')
     .attr('title', 'Select hymn to analyze.')

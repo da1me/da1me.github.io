@@ -11970,6 +11970,10 @@ let hinarioSets = [];
 let corpusStats;
 let authorSets;
 _jquery.default.getJSON('hinos/td.json', function (data) {
+  data.hinarios = data.hinarios.filter(h => {
+    if (h.title === 'O Mestre Diz') return false;
+    return h.hinos.some(hi => hi.tokens && hi.tokens.pt && hi.tokens.pt.length);
+  });
   (0, _jquery.default)('<label/>', {
     for: 'mselect'
   }).html('select hymnal: ').appendTo('#selectDiv');
