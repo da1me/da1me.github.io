@@ -11986,7 +11986,7 @@ _jquery.default.getJSON('hinos/td.json', function (data) {
   window.adata = data;
   hinarioSets = data.hinarios.map(h => (0, _stats.collectTokenSet)(h));
   corpusStats = (0, _stats.computeCorpusStats)(data.hinarios);
-  authorSets = (0, _stats.computeAuthorSets)(data.hinarios);
+  authorSets = (0, _network.computeAuthorSets)(data.hinarios);
   (0, _stats.updateCorpusStats)(corpusStats);
   (0, _network.drawAuthorNetwork)(authorSets);
   data.hinarios.forEach((i, count) => {
