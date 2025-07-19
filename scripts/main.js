@@ -465,7 +465,7 @@ function drawAuthorNetwork () {
   const { nodes, links } = computeAuthorNetwork()
   const width = 400
   const height = 300
-  const svg = d3.select('#authorNetwork').empty().append('svg')
+  const svg = d3.select('#authorNetwork').html('').append('svg')
     .attr('width', width)
     .attr('height', height)
 
