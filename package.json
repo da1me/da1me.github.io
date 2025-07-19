@@ -5,7 +5,7 @@
   },
   "scripts": {
     "build": "npx browserify scripts/main.js > scripts/bundle.js",
-    "dev": "nodemon app.js --exec 'standard && npm run build && node'",
+    "dev": "standard && npm run build && node app.js",
     "fixme": "standard --fix"
   },
   "dependencies": {
