@@ -28,7 +28,9 @@ jobs:
       # 4  Upload the static site as a Pages artefact
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./scripts/bundle.js
+          path: .
+          exclude: |
+            node_modules
 
   deploy:
     needs: build
