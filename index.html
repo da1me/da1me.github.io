@@ -1,33 +1,79 @@
 <html>
   <head>
     <title class="notranslate">&#x00C6;terni Anima</title>
-    <link id="favicon" rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link
+      id="favicon"
+      rel="icon"
+      type="image/svg+xml"
+      href="assets/favicon.svg"
+    />
     <link rel="stylesheet" href="assets/style.css" />
 
-    <meta property="og:image:secure_url" content="https://aeterni.github.io/assets/imgs/coil2.jpeg" />
-    <meta property="og:image:secure_url" content="https://aeterni.github.io/assets/imgs/sine.jpeg" />
-    <meta property="og:image:secure_url" content="https://aeterni.github.io/assets/imgs/coil.jpeg" />
-    <meta property="og:image:secure_url" content="https://aeterni.github.io/assets/imgs/blank.jpeg" />
+    <meta
+      property="og:image:secure_url"
+      content="https://aeterni.github.io/assets/imgs/coil2.jpeg"
+    />
+    <meta
+      property="og:image:secure_url"
+      content="https://aeterni.github.io/assets/imgs/sine.jpeg"
+    />
+    <meta
+      property="og:image:secure_url"
+      content="https://aeterni.github.io/assets/imgs/coil.jpeg"
+    />
+    <meta
+      property="og:image:secure_url"
+      content="https://aeterni.github.io/assets/imgs/blank.jpeg"
+    />
 
-    <meta property="og:image" content="https://aeterni.github.io/assets/imgs/coil2.jpeg" />
-    <meta property="og:image" content="https://aeterni.github.io/assets/imgs/sine.jpeg" />
-    <meta property="og:image" content="https://aeterni.github.io/assets/imgs/coil.jpeg" />
-    <meta property="og:image" content="https://aeterni.github.io/assets/imgs/blank.jpeg" />
+    <meta
+      property="og:image"
+      content="https://aeterni.github.io/assets/imgs/coil2.jpeg"
+    />
+    <meta
+      property="og:image"
+      content="https://aeterni.github.io/assets/imgs/sine.jpeg"
+    />
+    <meta
+      property="og:image"
+      content="https://aeterni.github.io/assets/imgs/coil.jpeg"
+    />
+    <meta
+      property="og:image"
+      content="https://aeterni.github.io/assets/imgs/blank.jpeg"
+    />
   </head>
-<body style="margin:0;font-family:Helvetica, arial">
-    <div id="loading"><br/><br/><div style="padding-top:30%">LOADING...</div></div>
+  <body style="margin: 0; font-family: Helvetica, arial">
+    <div id="loading">
+      <br /><br />
+      <div style="padding-top: 30%">LOADING...</div>
+    </div>
     <div id="selectDiv" class="centered"></div>
     <div id="controls" class="centered">
       <label for="wordCount">Words:</label>
       <input id="wordCount" type="number" value="100" min="10" max="500" />
-      <label><input type="checkbox" id="includeStopwords" /> include stop words</label>
-      <label for="jaccardThreshold">Similarity threshold: <span id="thresholdValue">0.05</span></label>
-      <input id="jaccardThreshold" type="range" min="0" max="1" step="0.01" value="0.05" />
+      <label
+        ><input type="checkbox" id="includeStopwords" /> include stop
+        words</label
+      >
+      <label for="jaccardThreshold"
+        >Similarity threshold: <span id="thresholdValue">0.05</span></label
+      >
+      <input
+        id="jaccardThreshold"
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
+        value="0.05"
+      />
     </div>
     <div id="contentContainer">
       <div id="canvasContainer">
         <canvas id="contentCanvas" width="1000" height="500"></canvas>
-        <button id="fullscreenBtn" title="View wordcloud full screen">&#x26F6;</button>
+        <button id="fullscreenBtn" title="View wordcloud full screen">
+          &#x26F6;
+        </button>
       </div>
       <div id="similarDiv"></div>
       <div id="statsDiv"></div>
@@ -36,7 +82,9 @@
       <div id="corpusStats"></div>
       <div id="networkContainer">
         <div id="authorNetwork"></div>
-        <button id="networkFullscreenBtn" title="View network full screen">&#x26F6;</button>
+        <button id="networkFullscreenBtn" title="View network full screen">
+          &#x26F6;
+        </button>
       </div>
     </div>
     <div id="wordModal" class="modal">
@@ -46,8 +94,7 @@
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-    <script type="module" src="scripts/bundle.js"></script>
-    <input id="file-input" type="file" name="name" style="display: none;" />
-
+    <script type="module" src="bundle.js"></script>
+    <input id="file-input" type="file" name="name" style="display: none" />
   </body>
 </html>
