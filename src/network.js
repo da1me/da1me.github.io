@@ -69,6 +69,8 @@ export function drawAuthorNetwork (authorSets) {
     .enter().append('circle')
     .attr('r', radius)
     .attr('fill', 'steelblue')
+    .on('mouseover', highlightNode)
+    .on('mouseout', resetHighlight)
     .call(d3.drag()
       .on('start', dragstarted)
       .on('drag', dragged)
@@ -106,5 +108,40 @@ export function drawAuthorNetwork (authorSets) {
     if (!event.active) simulation.alphaTarget(0)
     event.subject.fx = null
     event.subject.fy = null
+  }
+
+  function resetHighlight () {
+    link
+      .attr('stroke', '#999')
+      .attr('stroke-width', d => 1 + 4 * d.weight)
+    node
+      .attr('fill', 'steelblue')
+  }
+
+  function highlightNode (event, d) {
+    resetHighlight()
+    const neigh = new Set()
+    link
+      .attr('stroke', l => {
+        if (l.source.id === d.id || l.target.id === d.id) {
+          neigh.add(l.source.id)
+          neigh.add(l.target.id)
+          return 'orange'
+        }
+        return '#999'
+      })
+      .attr('stroke-width', l => {
+        if (l.source.id === d.id || l.target.id === d.id) {
+          return (1 + 4 * l.weight) * 1.5
+        }
+        return 1 + 4 * l.weight
+      })
+
+    node
+      .attr('fill', n => {
+        if (n.id === d.id) return 'orange'
+        if (neigh.has(n.id)) return 'lightblue'
+        return 'steelblue'
+      })
   }
 }
