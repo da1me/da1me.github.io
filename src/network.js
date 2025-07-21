@@ -32,8 +32,16 @@ export function drawAuthorNetwork (authorSets) {
   const threshold = Number($('#jaccardThreshold').val()) || 0.05
   const { nodes, links } = computeAuthorNetwork(authorSets, threshold)
   const container = $('#authorNetwork')
-  const width = container.width()
-  const height = container.height() || width * 0.75
+  let width = container.width()
+  let height = container.height() || width * 0.75
+  const doc = document
+  const el = container.get(0)
+  const fullscreen = doc.fullscreenElement === el || doc.webkitFullscreenElement === el || doc.msFullscreenElement === el
+  if (fullscreen) {
+    width = Math.max(width, window.innerWidth)
+    height = Math.max(height, window.innerHeight)
+  }
+  const clamp = (val, min, max) => Math.max(min, Math.min(max, val))
   container.empty()
   const svg = d3.select('#authorNetwork')
     .append('svg')
@@ -44,6 +52,8 @@ export function drawAuthorNetwork (authorSets) {
     .force('link', d3.forceLink(links).distance(80).strength(d => d.weight))
     .force('charge', d3.forceManyBody().strength(-100))
     .force('center', d3.forceCenter(width / 2, height / 2))
+    .force('x', d3.forceX(width / 2))
+    .force('y', d3.forceY(height / 2))
 
   const link = svg.append('g')
     .selectAll('line')
@@ -52,11 +62,12 @@ export function drawAuthorNetwork (authorSets) {
     .attr('stroke', '#999')
     .attr('stroke-width', d => 1 + 4 * d.weight)
 
+  const radius = 5
   const node = svg.append('g')
     .selectAll('circle')
     .data(nodes)
     .enter().append('circle')
-    .attr('r', 5)
+    .attr('r', radius)
     .attr('fill', 'steelblue')
     .call(d3.drag()
       .on('start', dragstarted)
@@ -72,14 +83,14 @@ export function drawAuthorNetwork (authorSets) {
     .text(d => d.name)
 
   simulation.on('tick', () => {
-    link.attr('x1', d => d.source.x)
-      .attr('y1', d => d.source.y)
-      .attr('x2', d => d.target.x)
-      .attr('y2', d => d.target.y)
-    node.attr('cx', d => d.x)
-      .attr('cy', d => d.y)
-    label.attr('x', d => d.x)
-      .attr('y', d => d.y)
+    link.attr('x1', d => clamp(d.source.x, radius, width - radius))
+      .attr('y1', d => clamp(d.source.y, radius, height - radius))
+      .attr('x2', d => clamp(d.target.x, radius, width - radius))
+      .attr('y2', d => clamp(d.target.y, radius, height - radius))
+    node.attr('cx', d => (d.x = clamp(d.x, radius, width - radius)))
+      .attr('cy', d => (d.y = clamp(d.y, radius, height - radius)))
+    label.attr('x', d => clamp(d.x, radius, width - radius))
+      .attr('y', d => clamp(d.y, radius, height - radius))
   })
 
   function dragstarted (event) {
