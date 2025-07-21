@@ -12239,10 +12239,10 @@ function setupUI(onControlsChange = () => {}) {
     (0, _jquery.default)('#wordModal').on('click', e => {
       if (e.target.id === 'wordModal') (0, _jquery.default)('#wordModal').hide();
     });
-    function toggleFullscreen() {
+    function toggleFullscreen(element) {
       const doc = document;
       if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-        const elem = document.documentElement;
+        const elem = element || document.documentElement;
         if (elem.requestFullscreen) {
           elem.requestFullscreen();
         } else if (elem.webkitRequestFullscreen) {
@@ -12260,8 +12260,8 @@ function setupUI(onControlsChange = () => {}) {
         }
       }
     }
-    (0, _jquery.default)('#fullscreenBtn').on('click', toggleFullscreen);
-    (0, _jquery.default)('#networkFullscreenBtn').on('click', toggleFullscreen);
+    (0, _jquery.default)('#fullscreenBtn').on('click', () => toggleFullscreen(document.getElementById('canvasContainer')));
+    (0, _jquery.default)('#networkFullscreenBtn').on('click', () => toggleFullscreen(document.getElementById('networkContainer')));
     (0, _jquery.default)('#wordCount').on('change', onControlsChange);
     (0, _jquery.default)('#includeStopwords').on('change', onControlsChange);
   });

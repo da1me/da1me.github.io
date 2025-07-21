@@ -12,10 +12,10 @@ export function setupUI (onControlsChange = () => {}) {
     $('#wordModal').on('click', e => {
       if (e.target.id === 'wordModal') $('#wordModal').hide()
     })
-    function toggleFullscreen () {
+    function toggleFullscreen (element) {
       const doc = document
       if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-        const elem = document.documentElement
+        const elem = element || document.documentElement
         if (elem.requestFullscreen) {
           elem.requestFullscreen()
         } else if (elem.webkitRequestFullscreen) {
@@ -34,8 +34,8 @@ export function setupUI (onControlsChange = () => {}) {
       }
     }
 
-    $('#fullscreenBtn').on('click', toggleFullscreen)
-    $('#networkFullscreenBtn').on('click', toggleFullscreen)
+    $('#fullscreenBtn').on('click', () => toggleFullscreen(document.getElementById('canvasContainer')))
+    $('#networkFullscreenBtn').on('click', () => toggleFullscreen(document.getElementById('networkContainer')))
 
     $('#wordCount').on('change', onControlsChange)
     $('#includeStopwords').on('change', onControlsChange)
