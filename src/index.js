@@ -47,12 +47,15 @@ $.getJSON('hinos/td.json', function (data) {
   corpusStats = computeCorpusStats(data.hinarios)
   authorSets = computeAuthorSets(data.hinarios)
   updateCorpusStats(corpusStats)
+  const redrawNetwork = () => drawAuthorNetwork(authorSets)
+  document.addEventListener('fullscreenchange', redrawNetwork)
+  window.addEventListener('resize', redrawNetwork)
   $('#thresholdValue').text($('#jaccardThreshold').val())
   $('#jaccardThreshold').on('input change', () => {
     $('#thresholdValue').text($('#jaccardThreshold').val())
-    drawAuthorNetwork(authorSets)
+    redrawNetwork()
   })
-  drawAuthorNetwork(authorSets)
+  redrawNetwork()
   data.hinarios.forEach((i, count) => {
     const aname = `${i.title} - ${i.person}`
     s.append($('<option/>', { class: 'pres' }).val(count).html(aname))

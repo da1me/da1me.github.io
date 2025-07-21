@@ -11998,12 +11998,15 @@ _jquery.default.getJSON('hinos/td.json', function (data) {
   corpusStats = (0, _stats.computeCorpusStats)(data.hinarios);
   authorSets = (0, _network.computeAuthorSets)(data.hinarios);
   (0, _stats.updateCorpusStats)(corpusStats);
+  const redrawNetwork = () => (0, _network.drawAuthorNetwork)(authorSets);
+  document.addEventListener('fullscreenchange', redrawNetwork);
+  window.addEventListener('resize', redrawNetwork);
   (0, _jquery.default)('#thresholdValue').text((0, _jquery.default)('#jaccardThreshold').val());
   (0, _jquery.default)('#jaccardThreshold').on('input change', () => {
     (0, _jquery.default)('#thresholdValue').text((0, _jquery.default)('#jaccardThreshold').val());
-    (0, _network.drawAuthorNetwork)(authorSets);
+    redrawNetwork();
   });
-  (0, _network.drawAuthorNetwork)(authorSets);
+  redrawNetwork();
   data.hinarios.forEach((i, count) => {
     const aname = `${i.title} - ${i.person}`;
     s.append((0, _jquery.default)('<option/>', {
@@ -12071,9 +12074,10 @@ function drawAuthorNetwork(authorSets) {
     nodes,
     links
   } = computeAuthorNetwork(authorSets, threshold);
-  const width = 400;
-  const height = 300;
-  const svg = d3.select('#authorNetwork').html('').append('svg').attr('width', width).attr('height', height);
+  const container = (0, _jquery.default)('#authorNetwork').html('');
+  const width = container.width();
+  const height = container.height() || width * 0.75;
+  const svg = container.append('svg').attr('width', width).attr('height', height);
   const simulation = d3.forceSimulation(nodes).force('link', d3.forceLink(links).distance(80).strength(d => d.weight)).force('charge', d3.forceManyBody().strength(-100)).force('center', d3.forceCenter(width / 2, height / 2));
   const link = svg.append('g').selectAll('line').data(links).enter().append('line').attr('stroke', '#999').attr('stroke-width', d => 1 + 4 * d.weight);
   const node = svg.append('g').selectAll('circle').data(nodes).enter().append('circle').attr('r', 5).attr('fill', 'steelblue').call(d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended));

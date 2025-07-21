@@ -31,9 +31,10 @@ export function computeAuthorNetwork (authorSets, threshold = 0.05) {
 export function drawAuthorNetwork (authorSets) {
   const threshold = Number($('#jaccardThreshold').val()) || 0.05
   const { nodes, links } = computeAuthorNetwork(authorSets, threshold)
-  const width = 400
-  const height = 300
-  const svg = d3.select('#authorNetwork').html('').append('svg')
+  const container = $('#authorNetwork').html('')
+  const width = container.width()
+  const height = container.height() || width * 0.75
+  const svg = container.append('svg')
     .attr('width', width)
     .attr('height', height)
 
