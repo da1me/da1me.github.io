@@ -19,18 +19,40 @@ export function computeAuthorSets (hinarios) {
 export function computeAuthorNetwork (authorSets, threshold = 0.05) {
   const nodes = authorSets.map(([name], i) => ({ id: i, name }))
   const links = []
+  let minWeight = Infinity
+  let maxWeight = 0
   for (let i = 0; i < authorSets.length; i++) {
     for (let j = i + 1; j < authorSets.length; j++) {
       const s = jaccard(authorSets[i][1], authorSets[j][1])
+      if (s < minWeight) minWeight = s
+      if (s > maxWeight) maxWeight = s
       if (s >= threshold) links.push({ source: i, target: j, weight: s })
     }
   }
-  return { nodes, links }
+  if (minWeight === Infinity) minWeight = 0
+  return { nodes, links, minWeight, maxWeight }
 }
 
 export function drawAuthorNetwork (authorSets) {
-  const threshold = Number($('#jaccardThreshold').val()) || 0.05
-  const { nodes, links } = computeAuthorNetwork(authorSets, threshold)
+  let threshold = Number($('#jaccardThreshold').val()) || 0.05
+  let network = computeAuthorNetwork(authorSets, threshold)
+  const slider = $('#jaccardThreshold')
+  const range = network.maxWeight - network.minWeight
+  const step = range > 0 ? (range / 50) : 0.01
+  slider.attr('min', network.minWeight)
+    .attr('max', network.maxWeight)
+    .attr('step', step)
+  if (threshold < network.minWeight) {
+    threshold = network.minWeight
+    slider.val(threshold)
+    network = computeAuthorNetwork(authorSets, threshold)
+  } else if (threshold > network.maxWeight) {
+    threshold = network.maxWeight
+    slider.val(threshold)
+    network = computeAuthorNetwork(authorSets, threshold)
+  }
+  $('#thresholdValue').text(slider.val())
+  const { nodes, links } = network
   const container = $('#authorNetwork')
   let width = container.width()
   let height = container.height() || width * 0.75
