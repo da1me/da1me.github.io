@@ -56,17 +56,6 @@
         ><input type="checkbox" id="includeStopwords" /> include stop
         words</label
       >
-      <label for="jaccardThreshold"
-        >Similarity threshold: <span id="thresholdValue">0.05</span></label
-      >
-      <input
-        id="jaccardThreshold"
-        type="range"
-        min="0"
-        max="1"
-        step="0.01"
-        value="0.05"
-      />
     </div>
     <div id="contentContainer">
       <div id="canvasContainer">
@@ -85,6 +74,19 @@
         <button id="networkFullscreenBtn" title="View network full screen">
           &#x26F6;
         </button>
+        <div id="networkControls">
+          <label for="jaccardThreshold"
+            >Similarity threshold: <span id="thresholdValue">0.05</span></label
+          >
+          <input
+            id="jaccardThreshold"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.05"
+          />
+        </div>
       </div>
     </div>
     <div id="wordModal" class="modal">

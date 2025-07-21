@@ -73,6 +73,23 @@
   font-size: 0.8em;
 }
 
+#networkControls {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 5px;
+  border-radius: 4px;
+}
+
+#networkControls label {
+  margin-right: 10px;
+}
+
+#networkControls input[type="range"] {
+  vertical-align: middle;
+}
+
 #similarDiv {
   max-width: 300px;
 }
