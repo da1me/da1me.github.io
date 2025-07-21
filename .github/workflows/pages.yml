@@ -1,4 +1,4 @@
-name: Build & deploy
+name: Build & deploy
 on:
   push:
     branches: [main]
@@ -14,18 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1  Set up Node so Browserify works
+      # 1  Set up Node so Browserify works
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # 2  Install dependencies
+      # 2  Install dependencies
       - run: npm ci
 
-      # 3  Bundle your code
-      - run: npx browserify scripts/main.js -o scripts/bundle.js
+      # 3  Bundle your code (use the npm script or match its exact command)
+      - run: npm run build
 
-      # 4  Upload the static site as a Pages artefact
+      # 4  Upload the static site as a Pages artefact
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
