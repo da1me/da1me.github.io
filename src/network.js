@@ -32,8 +32,12 @@ export function drawAuthorNetwork (authorSets) {
   const threshold = Number($('#jaccardThreshold').val()) || 0.05
   const { nodes, links } = computeAuthorNetwork(authorSets, threshold)
   const container = $('#authorNetwork').html('')
-  const width = container.width()
-  const height = container.height() || width * 0.75
+  let width = container.width()
+  let height = container.height() || width * 0.75
+  if (document.fullscreenElement && document.fullscreenElement.id === 'networkContainer') {
+    width = window.innerWidth
+    height = window.innerHeight
+  }
   const svg = container.append('svg')
     .attr('width', width)
     .attr('height', height)
@@ -42,6 +46,8 @@ export function drawAuthorNetwork (authorSets) {
     .force('link', d3.forceLink(links).distance(80).strength(d => d.weight))
     .force('charge', d3.forceManyBody().strength(-100))
     .force('center', d3.forceCenter(width / 2, height / 2))
+    .force('x', d3.forceX(width / 2).strength(0.1))
+    .force('y', d3.forceY(height / 2).strength(0.1))
 
   const link = svg.append('g')
     .selectAll('line')
@@ -69,13 +75,20 @@ export function drawAuthorNetwork (authorSets) {
     .attr('font-size', 10)
     .text(d => d.name)
 
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
   simulation.on('tick', () => {
-    link.attr('x1', d => d.source.x)
-      .attr('y1', d => d.source.y)
-      .attr('x2', d => d.target.x)
-      .attr('y2', d => d.target.y)
-    node.attr('cx', d => d.x)
-      .attr('cy', d => d.y)
+    link.attr('x1', d => clamp(d.source.x, 0, width))
+      .attr('y1', d => clamp(d.source.y, 0, height))
+      .attr('x2', d => clamp(d.target.x, 0, width))
+      .attr('y2', d => clamp(d.target.y, 0, height))
+    node.attr('cx', d => {
+      d.x = clamp(d.x, 0, width)
+      return d.x
+    })
+      .attr('cy', d => {
+        d.y = clamp(d.y, 0, height)
+        return d.y
+      })
     label.attr('x', d => d.x)
       .attr('y', d => d.y)
   })
