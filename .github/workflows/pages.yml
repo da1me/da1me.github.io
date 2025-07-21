@@ -29,8 +29,7 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
-          exclude: |
-            node_modules
+          exclude: node_modules
 
   deploy:
     needs: build
