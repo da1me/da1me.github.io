@@ -1,4 +1,11 @@
 import $ from 'jquery'
+import { initializeApp } from 'firebase/app'
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged
+} from 'firebase/auth'
 import { setupUI, getWordcloudOptions } from './ui.js'
 import { plotWordcloud } from './wordcloud.js'
 import {
@@ -11,6 +18,34 @@ import {
 import { computeAuthorSets, drawAuthorNetwork } from './network.js'
 
 window.jQuery = $
+
+// TODO: replace with your Firebase project configuration
+const firebaseConfig = {
+  apiKey: 'YOUR_API_KEY',
+  authDomain: 'YOUR_AUTH_DOMAIN',
+  projectId: 'YOUR_PROJECT_ID',
+  appId: 'YOUR_APP_ID'
+}
+
+const app = initializeApp(firebaseConfig)
+const auth = getAuth(app)
+const provider = new GoogleAuthProvider()
+
+function updateAuthUI (user) {
+  if (user) {
+    $('#loginContainer').hide()
+    $('#app').show()
+  } else {
+    $('#app').hide()
+    $('#loginContainer').show()
+  }
+}
+
+$('#googleSignIn').on('click', () => {
+  signInWithPopup(auth, provider).catch(err => console.error(err))
+})
+
+onAuthStateChanged(auth, user => updateAuthUI(user))
 
 let currentHinario
 function updateWordcloud () {
