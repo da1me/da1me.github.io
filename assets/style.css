@@ -323,3 +323,24 @@ input:checked + .slideraa:after
 .tooltip .tooltiptext:hover {
   visibility: hidden;
 }
+/* Section styles */
+#selectedHymnal, #corpusOverview {
+  margin: 2% auto;
+  padding: 1% 2%;
+  max-width: 1200px;
+}
+
+#selectedHymnal {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+}
+
+#corpusOverview {
+  background-color: #fafafa;
+  border: 1px solid #ccc;
+}
+
+#selectedHymnal h2, #corpusOverview h2 {
+  text-align: center;
+  margin-top: 0;
+}
