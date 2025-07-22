@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "browserify": "^17.0.1",
+    "firebase": "^9.22.1",
     "jquery": "^3.7.1",
     "wordcloud": "^1.2.2"
   },
