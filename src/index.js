@@ -13,9 +13,11 @@ import {
   computeCorpusStats,
   updateCorpusStats,
   updateStats,
-  updateSimilarHinarios
+  updateSimilarHinarios,
+  computeCorpusComparison,
+  updateCorpusComparison
 } from './stats.js'
-import { computeAuthorSets, drawAuthorNetwork } from './network.js'
+import { computeAuthorSets, drawAuthorNetwork, highlightAuthor } from './network.js'
 
 window.jQuery = $
 
@@ -75,6 +77,12 @@ $.getJSON('hinos/td.json', function (data) {
       updateWordcloud()
       updateSimilarHinarios(Number(ii), hinarioSets, data.hinarios)
       updateStats(currentHinario)
+      highlightAuthor(currentHinario.person)
+      if (corpusStats) {
+        const comp = computeCorpusComparison(currentHinario, corpusStats)
+        updateCorpusComparison(comp)
+      }
+      document.getElementById('corpusOverview').scrollIntoView({ behavior: 'smooth' })
     })
 
   window.adata = data
@@ -82,7 +90,10 @@ $.getJSON('hinos/td.json', function (data) {
   corpusStats = computeCorpusStats(data.hinarios)
   authorSets = computeAuthorSets(data.hinarios)
   updateCorpusStats(corpusStats)
-  const redrawNetwork = () => drawAuthorNetwork(authorSets)
+  const redrawNetwork = () => {
+    drawAuthorNetwork(authorSets)
+    if (currentHinario) highlightAuthor(currentHinario.person)
+  }
   document.addEventListener('fullscreenchange', redrawNetwork)
   window.addEventListener('resize', redrawNetwork)
   $('#thresholdValue').text($('#jaccardThreshold').val())
@@ -100,4 +111,7 @@ $.getJSON('hinos/td.json', function (data) {
   updateWordcloud()
   updateSimilarHinarios(0, hinarioSets, data.hinarios)
   updateStats(currentHinario)
+  highlightAuthor(currentHinario.person)
+  const comp = computeCorpusComparison(currentHinario, corpusStats)
+  updateCorpusComparison(comp)
 })

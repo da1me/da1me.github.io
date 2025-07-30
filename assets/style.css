@@ -121,7 +121,16 @@
   max-width: 300px;
 }
 
+#corpusComparison {
+  max-width: 300px;
+}
+
 #corpusStats ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+#corpusComparison ul {
   list-style-type: none;
   padding-left: 0;
 }

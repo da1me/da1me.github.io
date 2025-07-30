@@ -127,3 +127,21 @@ export function updateSimilarHinarios (index, hinarioSets, hinarios) {
     $('<li/>').text(label).appendTo(ul)
   })
 }
+
+export function computeCorpusComparison (hinario, corpusStats) {
+  const hStats = computeStats(hinario)
+  return {
+    hymnsShare: corpusStats.hymns ? hStats.hymnsCount / corpusStats.hymns : 0,
+    tokenShare: corpusStats.tokenCount ? hStats.tokenCount / corpusStats.tokenCount : 0,
+    uniqueShare: corpusStats.uniqueTokens ? hStats.uniqueTokens / corpusStats.uniqueTokens : 0
+  }
+}
+
+export function updateCorpusComparison (stats) {
+  const div = $('#corpusComparison').empty()
+  $('<h3/>').text('Corpus Share').appendTo(div)
+  const ul = $('<ul/>').appendTo(div)
+  $('<li/>').text(`Hymns: ${(stats.hymnsShare * 100).toFixed(1)}%`).appendTo(ul)
+  $('<li/>').text(`Words: ${(stats.tokenShare * 100).toFixed(1)}%`).appendTo(ul)
+  $('<li/>').text(`Unique words: ${(stats.uniqueShare * 100).toFixed(1)}%`).appendTo(ul)
+}

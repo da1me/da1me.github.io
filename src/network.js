@@ -1,5 +1,7 @@
 import $ from 'jquery'
 import { jaccard, stopWords_ } from './stats.js'
+
+let currentNetwork
 /* global d3 */
 
 export function computeAuthorSets (hinarios) {
@@ -166,4 +168,35 @@ export function drawAuthorNetwork (authorSets) {
         return 'steelblue'
       })
   }
+  currentNetwork = { link, node, nodes }
+}
+
+export function highlightAuthor (name) {
+  if (!currentNetwork) return
+  const { link, node, nodes } = currentNetwork
+  const d = nodes.find(n => n.name === name)
+  if (!d) return
+  const neigh = new Set()
+  link
+    .attr('stroke', l => {
+      if (l.source.id === d.id || l.target.id === d.id) {
+        neigh.add(l.source.id)
+        neigh.add(l.target.id)
+        return 'orange'
+      }
+      return '#999'
+    })
+    .attr('stroke-width', l => {
+      if (l.source.id === d.id || l.target.id === d.id) {
+        return (1 + 4 * l.weight) * 1.5
+      }
+      return 1 + 4 * l.weight
+    })
+
+  node
+    .attr('fill', n => {
+      if (n.id === d.id) return 'orange'
+      if (neigh.has(n.id)) return 'lightblue'
+      return 'steelblue'
+    })
 }
