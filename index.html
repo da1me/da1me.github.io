@@ -1,114 +1,168 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <title class="notranslate">&#x00C6;terni Anima</title>
-    <link
-      id="favicon"
-      rel="icon"
-      type="image/svg+xml"
-      href="assets/favicon.svg"
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title class="notranslate">&#x00C6;terni Anima &mdash; Hymnal Text Analysis</title>
+    <meta
+      name="description"
+      content="Explore the Santo Daime hymnal corpus: word clouds, vocabulary statistics, hymnal similarity and an author affinity network."
     />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#1b1a2e" />
+
+    <link id="favicon" rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
     <link rel="stylesheet" href="assets/style.css" />
 
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Æterni Anima — Hymnal Text Analysis" />
     <meta
-      property="og:image:secure_url"
-      content="https://aeterni.github.io/assets/imgs/coil2.jpeg"
+      property="og:description"
+      content="Explore the Santo Daime hymnal corpus: word clouds, vocabulary statistics, hymnal similarity and an author affinity network."
     />
-    <meta
-      property="og:image:secure_url"
-      content="https://aeterni.github.io/assets/imgs/sine.jpeg"
-    />
-    <meta
-      property="og:image:secure_url"
-      content="https://aeterni.github.io/assets/imgs/coil.jpeg"
-    />
-    <meta
-      property="og:image:secure_url"
-      content="https://aeterni.github.io/assets/imgs/blank.jpeg"
-    />
-
-    <meta
-      property="og:image"
-      content="https://aeterni.github.io/assets/imgs/coil2.jpeg"
-    />
-    <meta
-      property="og:image"
-      content="https://aeterni.github.io/assets/imgs/sine.jpeg"
-    />
-    <meta
-      property="og:image"
-      content="https://aeterni.github.io/assets/imgs/coil.jpeg"
-    />
-    <meta
-      property="og:image"
-      content="https://aeterni.github.io/assets/imgs/blank.jpeg"
-    />
+    <meta property="og:url" content="https://da1me.github.io/" />
+    <meta property="og:image" content="https://da1me.github.io/assets/favicon.svg" />
+    <meta name="twitter:card" content="summary" />
   </head>
-  <body style="margin: 0; font-family: Helvetica, arial">
-    <div id="loginContainer" class="centered">
-      <button id="googleSignIn">Sign in with Google</button>
-    </div>
-    <div id="app" style="display:none;">
-    <div id="loading">
-      <br /><br />
-      <div style="padding-top: 30%">LOADING...</div>
-    </div>
-    <section id="selectedHymnal">
-      <h2>Selected Hymnal</h2>
-    <div id="selectDiv" class="centered"></div>
-    <div id="controls" class="centered">
-      <label for="wordCount">Words:</label>
-      <input id="wordCount" type="number" value="100" min="10" max="500" />
-      <label
-        ><input type="checkbox" id="includeStopwords" /> include stop
-        words</label
-      >
-    </div>
-    <div id="contentContainer">
-      <div id="canvasContainer">
-        <canvas id="contentCanvas" width="1000" height="500"></canvas>
-        <button id="fullscreenBtn" title="View wordcloud full screen">
-          &#x26F6;
-        </button>
-      </div>
-      <div id="similarDiv"></div>
-      <div id="statsDiv"></div>
-    </div>
-    </section>
-    <section id="corpusOverview">
-      <h2>Corpus Overview</h2>
-    <div id="corpusContainer">
-      <div id="corpusStats"></div>
-      <div id="corpusComparison"></div>
-      <div id="networkContainer">
-        <div id="authorNetwork"></div>
-        <button id="networkFullscreenBtn" title="View network full screen">
-          &#x26F6;
-        </button>
-        <div id="networkControls">
-          <label for="jaccardThreshold"
-            >Similarity threshold: <span id="thresholdValue">0.27</span></label
-          >
-          <input
-            id="jaccardThreshold"
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value="0.27"
-          />
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="brand" href="./">
+          <img class="brand-mark" src="assets/favicon.svg" alt="" width="28" height="28" />
+          <span class="brand-text">
+            <strong class="notranslate">&#x00C6;terni Anima</strong>
+            <small>hymnal text analysis</small>
+          </span>
+        </a>
+        <div class="header-actions">
+          <button id="themeToggle" class="icon-btn" type="button" title="Toggle dark mode" aria-label="Toggle dark mode">
+            <span aria-hidden="true">&#x25D1;</span>
+          </button>
+          <button id="googleSignIn" class="btn btn-ghost" type="button">Sign in</button>
+          <div id="userChip" class="user-chip" hidden>
+            <img id="userAvatar" class="user-avatar" alt="" width="26" height="26" />
+            <span id="userName" class="user-name"></span>
+            <button id="signOut" class="btn btn-quiet" type="button">Sign out</button>
+          </div>
         </div>
       </div>
-    </div>
-    </section>
-    <div id="wordModal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <p id="modalWord"></p>
+    </header>
+
+    <div id="loading" class="loading" role="status" aria-live="polite">
+      <div class="loading-inner">
+        <div class="spinner" aria-hidden="true"></div>
+        <p class="loading-text">Loading the corpus…</p>
       </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-    <script type="module" src="scripts/bundle.js"></script>
-    <input id="file-input" type="file" name="name" style="display: none" />
+
+    <main id="main" class="wrap">
+      <section id="selectedHymnal" class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Selected hymnal</h2>
+            <p class="panel-sub">
+              Pick a hymnal to see its vocabulary, how it compares to the corpus, and which
+              hymnals share its language.
+            </p>
+          </div>
+        </div>
+
+        <div id="selectDiv" class="picker"></div>
+
+        <div id="controls" class="controls">
+          <label class="field">
+            <span class="field-label">Words shown</span>
+            <input id="wordCount" type="number" value="100" min="10" max="500" step="10" />
+          </label>
+          <label class="check">
+            <input type="checkbox" id="includeStopwords" />
+            <span>Include stop words</span>
+          </label>
+          <div class="controls-spacer"></div>
+          <button id="downloadCloud" class="btn btn-quiet" type="button" title="Download the word cloud as a PNG">
+            Download PNG
+          </button>
+          <button id="downloadCsv" class="btn btn-quiet" type="button" title="Download word frequencies as CSV">
+            Export CSV
+          </button>
+        </div>
+
+        <div id="contentContainer" class="content-grid">
+          <div id="canvasContainer" class="card canvas-card">
+            <canvas id="contentCanvas" width="1000" height="620"></canvas>
+            <button id="fullscreenBtn" class="icon-btn floating" type="button" title="View word cloud full screen" aria-label="View word cloud full screen">
+              <span aria-hidden="true">&#x26F6;</span>
+            </button>
+            <p class="canvas-hint">Click any word to read the hymn lines it appears in.</p>
+          </div>
+
+          <div class="side-column">
+            <div id="statsDiv" class="card"></div>
+            <div id="topWordsDiv" class="card"></div>
+            <div id="similarDiv" class="card"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="corpusOverview" class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Corpus overview</h2>
+            <p class="panel-sub">
+              The whole collection at a glance, and how authors cluster by shared vocabulary.
+            </p>
+          </div>
+        </div>
+
+        <div id="corpusContainer" class="corpus-grid">
+          <div class="side-column">
+            <div id="corpusStats" class="card"></div>
+            <div id="corpusComparison" class="card"></div>
+          </div>
+
+          <div id="networkContainer" class="card network-card">
+            <div class="card-head">
+              <h3>Author affinity network</h3>
+              <button id="networkFullscreenBtn" class="icon-btn" type="button" title="View network full screen" aria-label="View network full screen">
+                <span aria-hidden="true">&#x26F6;</span>
+              </button>
+            </div>
+            <div id="authorNetwork" class="network-canvas"></div>
+            <div id="networkControls" class="network-controls">
+              <label class="field field-inline" for="jaccardThreshold">
+                <span class="field-label">Similarity threshold</span>
+                <input id="jaccardThreshold" type="range" min="0" max="1" step="0.01" value="0.27" />
+                <output id="thresholdValue" class="field-value">0.27</output>
+              </label>
+              <p class="network-hint">
+                Drag nodes to rearrange, scroll to zoom. Thicker links mean more shared vocabulary.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>
+          Æterni Anima · hymnal literature analysis ·
+          <a href="https://github.com/da1me/da1me.github.io">source on GitHub</a>
+        </p>
+      </div>
+    </footer>
+
+    <div id="wordModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalWord" hidden>
+      <div class="modal-content">
+        <button class="close" type="button" aria-label="Close">&times;</button>
+        <h3 id="modalWord"></h3>
+        <div id="modalBody" class="modal-body"></div>
+      </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="scripts/bundle.js" defer></script>
   </body>
 </html>

@@ -5,8 +5,11 @@
     "standard": "*"
   },
   "scripts": {
-    "build": "npx browserify src/index.js -p esmify > scripts/bundle.js",
-    "dev": "nodemon app.js --exec 'standard && npm run build && node'",
+    "build": "npm run build:corpus && npm run build:js",
+    "build:corpus": "node scripts/buildCorpus.js",
+    "build:js": "npx browserify src/index.js -p esmify > scripts/bundle.js",
+    "test": "node tests/stats.test.mjs",
+    "dev": "nodemon app.js --exec 'standard && npm run build:js && node'",
     "fixme": "standard --fix"
   },
   "dependencies": {

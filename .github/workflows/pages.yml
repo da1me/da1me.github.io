@@ -22,14 +22,30 @@ jobs:
       # 2  Install dependencies
       - run: npm ci
 
-      # 3  Bundle your code (use the npm script or match its exact command)
+      # 3  Lint and test before anything ships
+      - run: npx standard
+      - run: npm test
+
+      # 4  Build the slim corpus index and the browser bundle
       - run: npm run build
 
-      # 4  Upload the static site as a Pages artefact
+      # 5  Stage only the files the site actually serves.
+      #    upload-pages-artifact@v3 has no exclude input, so uploading "." would
+      #    ship the whole node_modules tree.
+      - name: Stage site
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp -r assets _site/
+          mkdir -p _site/scripts && cp scripts/bundle.js _site/scripts/
+          mkdir -p _site/hinos
+          cp hinos/corpus.json _site/hinos/
+          cp hinos/td.json _site/hinos/
+
+      # 6  Upload the static site as a Pages artefact
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
-          exclude: node_modules
+          path: _site
 
   deploy:
     needs: build
