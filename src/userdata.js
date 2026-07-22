@@ -3,7 +3,7 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
+  deleteField,
   arrayUnion,
   arrayRemove
 } from 'firebase/firestore'
@@ -108,13 +108,13 @@ export function saveNote (key, text) {
   if (trimmed) cache.notes[key] = trimmed
   else delete cache.notes[key]
 
-  // merge:true deep-merges maps, so this only touches the one note key.
-  return setDoc(userRef(), { notes: { [key]: trimmed } }, { merge: true })
-    .then(() => {
-      if (trimmed) return
-      // Firestore has no "delete map key" in a merge write, so clear it after.
-      return updateDoc(userRef(), { [`notes.${key}`]: null }).catch(() => {})
-    })
+  // merge:true deep-merges maps, so this only touches the one note key, and
+  // deleteField() drops an emptied note instead of leaving "" behind.
+  return setDoc(
+    userRef(),
+    { notes: { [key]: trimmed || deleteField() } },
+    { merge: true }
+  )
     .catch(err => {
       if (previous === undefined) delete cache.notes[key]
       else cache.notes[key] = previous
