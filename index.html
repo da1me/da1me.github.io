@@ -71,6 +71,17 @@
 
         <div id="selectDiv" class="picker"></div>
 
+        <div class="picker-actions">
+          <button id="favoriteBtn" class="btn btn-quiet fav-btn" type="button" aria-pressed="false">
+            <span class="fav-star" aria-hidden="true">&#x2605;</span>
+            <span id="favoriteLabel">Save to favourites</span>
+          </button>
+          <label class="check" id="favoritesOnlyWrap" hidden>
+            <input type="checkbox" id="favoritesOnly" />
+            <span>Favourites only</span>
+          </label>
+        </div>
+
         <div id="controls" class="controls">
           <label class="field">
             <span class="field-label">Words shown</span>
@@ -100,6 +111,24 @@
 
           <div class="side-column">
             <div id="statsDiv" class="card"></div>
+            <div id="notesCard" class="card">
+              <h3>My notes</h3>
+              <div id="notesSignedOut">
+                <p class="card-note note-prompt">
+                  Sign in to save favourite hymnals and keep private notes on each one.
+                </p>
+                <button id="notesSignIn" class="btn btn-ghost" type="button">Sign in</button>
+              </div>
+              <div id="notesEditor" hidden>
+                <textarea
+                  id="noteText"
+                  rows="5"
+                  placeholder="Your notes on this hymnal…"
+                  aria-label="Your notes on this hymnal"
+                ></textarea>
+                <p id="noteStatus" class="note-status" role="status"></p>
+              </div>
+            </div>
             <div id="topWordsDiv" class="card"></div>
             <div id="similarDiv" class="card"></div>
           </div>
@@ -153,6 +182,57 @@
         </p>
       </div>
     </footer>
+
+    <div id="authModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle" hidden>
+      <div class="modal-content modal-narrow">
+        <button class="close" type="button" aria-label="Close">&times;</button>
+        <h3 id="authTitle">Sign in</h3>
+        <p class="modal-meta">
+          Accounts are only used to save your favourite hymnals and private notes. The
+          corpus itself stays free to browse.
+        </p>
+
+        <div class="auth-tabs" role="tablist">
+          <button class="auth-tab is-active" type="button" data-mode="signin" role="tab">
+            Sign in
+          </button>
+          <button class="auth-tab" type="button" data-mode="signup" role="tab">
+            Create account
+          </button>
+        </div>
+
+        <button id="googleAuthBtn" class="btn btn-google" type="button">
+          Continue with Google
+        </button>
+
+        <div class="auth-divider"><span>or use your email</span></div>
+
+        <form id="authForm" novalidate>
+          <label class="field">
+            <span class="field-label">Email</span>
+            <input id="authEmail" type="email" autocomplete="email" required />
+          </label>
+          <label class="field">
+            <span class="field-label">Password</span>
+            <input
+              id="authPassword"
+              type="password"
+              autocomplete="current-password"
+              minlength="6"
+              required
+            />
+          </label>
+
+          <p id="authError" class="auth-error" role="alert" hidden></p>
+          <p id="authNotice" class="auth-notice" role="status" hidden></p>
+
+          <button id="authSubmit" class="btn btn-primary" type="submit">Sign in</button>
+          <button id="authReset" class="btn btn-link" type="button">
+            Forgot your password?
+          </button>
+        </form>
+      </div>
+    </div>
 
     <div id="wordModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalWord" hidden>
       <div class="modal-content">

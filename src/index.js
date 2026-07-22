@@ -20,6 +20,15 @@ import {
 } from './stats.js'
 import { computeAuthorSets, drawAuthorNetwork, highlightAuthor } from './network.js'
 import { showConcordance } from './concordance.js'
+import {
+  loadUserData,
+  hymnalKey,
+  isSignedIn,
+  isFavorite,
+  toggleFavorite,
+  getNote,
+  saveNote
+} from './userdata.js'
 
 window.jQuery = $
 
@@ -44,6 +53,35 @@ function updateWordcloud () {
   updateTopWords(currentList, openWord)
 }
 
+/** Reflect the current hymnal's saved state in the favourite button and notes. */
+function renderUserState () {
+  const hinario = currentHinario()
+  const signedIn = isSignedIn()
+
+  $('#favoritesOnlyWrap').attr('hidden', !signedIn)
+  $('#notesSignedOut').attr('hidden', signedIn)
+  $('#notesEditor').attr('hidden', !signedIn)
+
+  const btn = $('#favoriteBtn').prop('disabled', !signedIn)
+  if (!signedIn) {
+    btn.attr('aria-pressed', 'false').attr('title', 'Sign in to save favourites')
+    $('#favoriteLabel').text('Save to favourites')
+    $('#favoritesOnly').prop('checked', false)
+    return
+  }
+
+  const key = hymnalKey(hinario)
+  const fav = isFavorite(key)
+  btn
+    .attr('aria-pressed', String(fav))
+    .attr('title', fav ? 'Remove from favourites' : 'Save to favourites')
+  $('#favoriteLabel').text(fav ? 'In your favourites' : 'Save to favourites')
+
+  // Do not clobber what the user is mid-way through typing.
+  if (!$('#noteText').is(':focus')) $('#noteText').val(getNote(key))
+  $('#noteStatus').removeClass('is-error').text('')
+}
+
 function selectHinario (index, { scroll = false } = {}) {
   if (!hinarios[index]) return
   currentIndex = index
@@ -51,6 +89,7 @@ function selectHinario (index, { scroll = false } = {}) {
 
   const hinario = currentHinario()
   updateWordcloud()
+  renderUserState()
   updateStats(hinario)
   updateSimilarHinarios(index, hinarioSets, hinarios, i =>
     selectHinario(i, { scroll: true })
@@ -71,7 +110,95 @@ setupUI({
   }
 })
 
-setupAuth()
+// Signing in only adds favourites and notes on top of the public corpus, so the
+// page never waits on auth before rendering.
+setupAuth(user => {
+  loadUserData(user).then(() => {
+    if (hinarios.length) {
+      renderUserState()
+      decorateOptions()
+      applyPickerFilter()
+    }
+  })
+})
+
+$('#favoriteBtn').on('click', () => {
+  if (!isSignedIn()) return
+  const key = hymnalKey(currentHinario())
+  toggleFavorite(key)
+    .then(() => {
+      renderUserState()
+      decorateOptions()
+      applyPickerFilter()
+    })
+    .catch(err => {
+      console.warn('Could not save favourite:', err)
+      $('#noteStatus').addClass('is-error').text('Could not save that. Check your connection.')
+    })
+})
+
+$('#favoritesOnly').on('change', applyPickerFilter)
+
+// Autosave notes shortly after typing stops, and immediately on blur.
+let noteTimer
+function flushNote () {
+  clearTimeout(noteTimer)
+  if (!isSignedIn()) return
+  const key = hymnalKey(currentHinario())
+  const text = $('#noteText').val()
+  if (text.trim() === getNote(key)) return
+  $('#noteStatus').removeClass('is-error').text('Saving…')
+  saveNote(key, text)
+    .then(() => $('#noteStatus').text('Saved'))
+    .catch(err => {
+      console.warn('Could not save note:', err)
+      $('#noteStatus').addClass('is-error').text('Could not save. Check your connection.')
+    })
+}
+
+$('#noteText').on('input', () => {
+  clearTimeout(noteTimer)
+  noteTimer = setTimeout(flushNote, 900)
+})
+$('#noteText').on('blur', flushNote)
+
+/** Mark favourited hymnals with a star in the picker. */
+function decorateOptions () {
+  const signedIn = isSignedIn()
+  $('#mselect')
+    .children('option')
+    .each(function () {
+      const option = $(this)
+      const h = hinarios[Number(option.val())]
+      const star = signedIn && isFavorite(hymnalKey(h)) ? '★ ' : ''
+      option.text(`${star}${h.title} — ${h.person}`)
+    })
+}
+
+/** Narrow the picker by the search box and the favourites-only checkbox. */
+function applyPickerFilter () {
+  const select = $('#mselect')
+  if (!select.length) return
+
+  const q = ($('#hymnalSearch').val() || '').trim().toLowerCase()
+  const favOnly = isSignedIn() && $('#favoritesOnly').is(':checked')
+  let firstMatch = -1
+
+  select.children('option').each(function () {
+    const option = $(this)
+    const h = hinarios[Number(option.val())]
+    const matchesText = !q || option.data('search').includes(q)
+    const matchesFav = !favOnly || isFavorite(hymnalKey(h))
+    const hit = matchesText && matchesFav
+    option.prop('hidden', !hit)
+    if (hit && firstMatch === -1) firstMatch = Number(option.val())
+  })
+
+  // Keep the select showing something valid as the list narrows.
+  if (firstMatch !== -1 && select.children('option:selected').prop('hidden')) {
+    selectHinario(firstMatch)
+  }
+}
 
 /** Build the searchable hymnal picker. */
 function buildPicker () {
@@ -90,20 +217,7 @@ function buildPicker () {
     'aria-label': 'Filter hymnals by title or author'
   })
     .appendTo(div)
-    .on('input', e => {
-      const q = e.currentTarget.value.trim().toLowerCase()
-      let firstMatch = -1
-      select.children('option').each(function () {
-        const option = $(this)
-        const hit = !q || option.data('search').includes(q)
-        option.prop('hidden', !hit)
-        if (hit && firstMatch === -1) firstMatch = Number(option.val())
-      })
-      // Keep the select showing something valid as the list narrows.
-      if (firstMatch !== -1 && select.children('option:selected').prop('hidden')) {
-        selectHinario(firstMatch)
-      }
-    })
+    .on('input', applyPickerFilter)
 
   hinarios.forEach((h, i) => {
     $('<option/>')
@@ -139,6 +253,7 @@ fetch('hinos/corpus.json')
     updateCorpusStats(corpusStats)
 
     buildPicker()
+    decorateOptions()
 
     const redrawNetwork = () => drawAuthorNetwork(authorSets)
     document.addEventListener('fullscreenchange', redrawNetwork)
